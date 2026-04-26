@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gender Reveal Prediction Market</title>
+  <style>
+    :root {
+      --bg: #fff9fd;
+      --bg-soft: #fff4fb;
+      --panel: rgba(255, 253, 255, 0.94);
+      --panel-strong: rgba(255, 249, 253, 0.98);
+      --border: rgba(228, 194, 219, 0.62);
+      --text: #6c4b63;
+      --muted: #b08ea6;
+      --pink: #f58cc3;
+      --pink-soft: rgba(245, 140, 195, 0.18);
+      --blue: #8fcdf7;
+      --blue-soft: rgba(143, 205, 247, 0.2);
+      --success: #54d59f;
+      --danger: #ff7c9c;
+      --glow: 0 0 20px rgba(143, 205, 247, 0.14), 0 0 14px rgba(245, 140, 195, 0.14);
+      --radius: 22px;
+      --radius-sm: 16px;
+      --shadow: 0 18px 42px rgba(221, 186, 208, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(245, 140, 195, 0.22), transparent 36%),
+        radial-gradient(circle at top right, rgba(143, 205, 247, 0.24), transparent 36%),
+        radial-gradient(circle at bottom center, rgba(255, 235, 244, 0.9), transparent 42%),
+        linear-gradient(180deg, #fffaff 0%, #fff2fa 50%, #f3fbff 100%);
+      color: var(--text);
+      font-family: "Trebuchet MS", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      padding: 18px;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar,
+    .card,
+    .admin-panel,
+    .result-banner {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      padding: 20px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      position: sticky;
+      top: 18px;
+      z-index: 20;
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.72rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      letter-spacing: -0.04em;
+    }
+
+    .subline {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status-pill {
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .dashboard,
+    .left-col,
+    .right-col {
+      display: grid;
+      gap: 18px;
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .market-card {
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .market-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -55% auto;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      filter: blur(18px);
+      opacity: 0.22;
+      pointer-events: none;
+    }
+
+    .market-card.pink::after {
+      background: var(--pink);
+    }
+
+    .market-card.blue::after {
+      background: var(--blue);
+    }
+
+    .market-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: 1px solid currentColor;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .pink .tag,
+    .pink .price,
+    .pink .accent {
+      color: var(--pink);
+    }
+
+    .blue .tag,
+    .blue .price,
+    .blue .accent {
+      color: var(--blue);
+    }
+
+    .price {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      text-shadow: var(--glow);
+      filter: saturate(0.88);
+    }
+
+    .pool-grid,
+    .stats-grid,
+    .position-row {
+      display: grid;
+      gap: 14px;
+    }
+
+    .pool-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 20px;
+    }
+
+    .mini-stat,
+    .stat-box,
+    .position-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.76);
+      padding: 14px 16px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 8px;
+    }
+
+    .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .trade-card,
+    .wallet-card {
+      padding: 22px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .position-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .trade-controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .trade-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .amount-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .chip,
+    .action-btn,
+    .admin-btn {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.78);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+
+    .chip {
+      padding: 10px 0;
+      color: var(--muted);
+    }
+
+    .action-grid,
+    .admin-actions {
+      display: grid;
+      gap: 12px;
+    }
+
+    .action-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .action-btn,
+    .admin-btn {
+      padding: 15px 16px;
+      font-weight: 700;
+    }
+
+    .action-btn.pink {
+      border-color: rgba(245, 140, 195, 0.42);
+      background: linear-gradient(180deg, rgba(253, 209, 231, 0.92), rgba(255, 239, 247, 0.98));
+      box-shadow: 0 10px 22px rgba(245, 140, 195, 0.15);
+    }
+
+    .action-btn.blue {
+      border-color: rgba(143, 205, 247, 0.45);
+      background: linear-gradient(180deg, rgba(213, 239, 253, 0.95), rgba(242, 251, 255, 0.98));
+      box-shadow: 0 10px 22px rgba(143, 205, 247, 0.16);
+    }
+
+    .chip:hover,
+    .action-btn:hover,
+    .admin-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(212, 160, 192, 0.52);
+    }
+
+    .chip.active {
+      border-color: rgba(143, 205, 247, 0.5);
+      color: var(--blue);
+      background: rgba(143, 205, 247, 0.16);
+    }
+
+    .action-btn:disabled,
+    .admin-btn:disabled,
+    .chip:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .simple-note {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.62);
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .result-banner {
+      display: none;
+      padding: 20px 22px;
+      border-left: 4px solid var(--success);
+      background: linear-gradient(90deg, rgba(210, 247, 226, 0.92), rgba(255, 255, 255, 0.88));
+    }
+
+    .result-banner.visible {
+      display: block;
+    }
+
+    .result-banner h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+    }
+
+    .admin-panel {
+      padding: 20px 22px;
+      margin-top: 2px;
+      display: grid;
+      gap: 14px;
+      opacity: 0.9;
+    }
+
+    .admin-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+
+    .terminal-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 980px) {
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 12px;
+      }
+
+      .topbar {
+        position: static;
+        padding: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .market-grid,
+      .stats-grid,
+      .position-row,
+      .admin-actions,
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-amounts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="topbar">
+      <div class="brand">
+        <div class="eyebrow">Realtime Prediction Market</div>
+        <h1>Gender Reveal Terminal</h1>
+        <div class="subline">Constant-product pricing, shared live market, local virtual wallet.</div>
+      </div>
+      <div class="status-pill" id="connectionStatus">Connecting to Supabase...</div>
+    </section>
+
+    <section class="result-banner" id="resultBanner">
+      <h2 id="resultTitle">Reveal locked in</h2>
+      <div id="resultMessage" class="muted"></div>
+    </section>
+
+    <section class="dashboard">
+      <div class="left-col">
+        <div class="market-grid">
+          <article class="card market-card pink">
+            <header>
+              <div>
+                <div class="tag">Pink</div>
+                <div class="subline">Market price</div>
+              </div>
+              <div class="accent" id="pinkMomentum">Bullish</div>
+            </header>
+            <div class="price" id="pinkPrice">$0.50</div>
+            <div class="pool-grid">
+              <div class="mini-stat">
+                <div class="label">Pink Pool</div>
+                <div class="value" id="pinkPool">500.00</div>
+              </div>
+              <div class="mini-stat">
+                <div class="label">Your Pink Tickets</div>
+                <div class="value" id="pinkShares">0</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card market-card blue">
+            <header>
+              <div>
+                <div class="tag">Blue</div>
+                <div class="subline">Market price</div>
+              </div>
+              <div class="accent" id="blueMomentum">Bullish</div>
+            </header>
+            <div class="price" id="bluePrice">$0.50</div>
+            <div class="pool-grid">
+              <div class="mini-stat">
+                <div class="label">Blue Pool</div>
+                <div class="value" id="bluePool">500.00</div>
+              </div>
+              <div class="mini-stat">
+                <div class="label">Your Blue Tickets</div>
+                <div class="value" id="blueShares">0</div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card trade-card">
+          <div class="trade-controls">
+            <div class="trade-header">
+              <div>
+                <h2 class="section-title">Make A Guess</h2>
+                <div class="muted">Choose an amount, then tap Pink or Blue.</div>
+              </div>
+              <div class="value" id="betAmountLabel">$50</div>
+            </div>
+
+            <div class="amount-wrap">
+              <input id="betAmount" type="range" min="10" max="200" step="10" value="50">
+              <div class="quick-amounts">
+                <button class="chip" data-amount="25">$25</button>
+                <button class="chip active" data-amount="50">$50</button>
+                <button class="chip" data-amount="100">$100</button>
+              </div>
+            </div>
+
+            <div class="action-grid">
+              <button class="action-btn pink" id="betPinkBtn">Guess Pink</button>
+              <button class="action-btn blue" id="betBlueBtn">Guess Blue</button>
+            </div>
+
+            <div class="simple-note" id="tradeHint">Every guess nudges the live odds for everyone watching.</div>
+          </div>
+        </article>
+      </div>
+
+      <div class="right-col">
+        <article class="card wallet-card">
+          <h2 class="section-title">Your Tickets</h2>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="label">Virtual Balance</div>
+              <div class="value" id="userBalance">$1,000.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Total Tickets</div>
+              <div class="value" id="totalShares">0</div>
+            </div>
+          </div>
+          <div class="position-row" style="margin-top: 14px;">
+            <div class="position-box">
+              <div class="label">Pink Tickets</div>
+              <div class="value" id="positionPink">0</div>
+            </div>
+            <div class="position-box">
+              <div class="label">Blue Tickets</div>
+              <div class="value" id="positionBlue">0</div>
+            </div>
+          </div>
+          <div class="simple-note" style="margin-top: 14px;">Each ticket pays $1 if that color wins. Your balance and tickets stay on this device.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="admin-panel">
+      <div class="terminal-line">
+        <strong>Admin Reveal Console</strong>
+        <span>Bottom aligned so it stays out of the way during the event.</span>
+      </div>
+      <div class="admin-actions">
+        <button class="admin-btn" id="revealPinkBtn">Reveal Pink Winner</button>
+        <button class="admin-btn" id="revealBlueBtn">Reveal Blue Winner</button>
+      </div>
+      <div class="muted">Use after setting `SUPABASE_URL` and `SUPABASE_ANON_KEY`, and after running the SQL schema from the instructions below.</div>
+    </section>
+
+    <div class="footer-note">Single-file deployment: drop this file on static hosting and wire your Supabase project keys.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://pyaqlhumyhvsutamhwmb.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_DIejNqBd3o6wIjuxDGWp2A_an9icl7t";
+    const MARKET_ID = 1;
+    const STORAGE_KEY = "gender-reveal-market-wallet-v1";
+    const DEFAULT_WALLET = { balance: 1000, pinkShares: 0, blueShares: 0, history: [] };
+
+    const els = {
+      connectionStatus: document.getElementById("connectionStatus"),
+      pinkPrice: document.getElementById("pinkPrice"),
+      bluePrice: document.getElementById("bluePrice"),
+      pinkPool: document.getElementById("pinkPool"),
+      bluePool: document.getElementById("bluePool"),
+      pinkShares: document.getElementById("pinkShares"),
+      blueShares: document.getElementById("blueShares"),
+      userBalance: document.getElementById("userBalance"),
+      totalShares: document.getElementById("totalShares"),
+      positionPink: document.getElementById("positionPink"),
+      positionBlue: document.getElementById("positionBlue"),
+      betAmount: document.getElementById("betAmount"),
+      betAmountLabel: document.getElementById("betAmountLabel"),
+      tradeHint: document.getElementById("tradeHint"),
+      betPinkBtn: document.getElementById("betPinkBtn"),
+      betBlueBtn: document.getElementById("betBlueBtn"),
+      revealPinkBtn: document.getElementById("revealPinkBtn"),
+      revealBlueBtn: document.getElementById("revealBlueBtn"),
+      resultBanner: document.getElementById("resultBanner"),
+      resultTitle: document.getElementById("resultTitle"),
+      resultMessage: document.getElementById("resultMessage"),
+      pinkMomentum: document.getElementById("pinkMomentum"),
+      blueMomentum: document.getElementById("blueMomentum")
+    };
+
+    const state = {
+      wallet: loadWallet(),
+      market: null,
+      channel: null,
+      supabase: null,
+      isBusy: false
+    };
+
+    function loadWallet() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? { ...DEFAULT_WALLET, ...JSON.parse(raw) } : { ...DEFAULT_WALLET };
+      } catch (error) {
+        return { ...DEFAULT_WALLET };
+      }
+    }
+
+    function saveWallet() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.wallet));
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(value || 0));
+    }
+
+    function formatShares(value) {
+      return Number(value || 0).toFixed(2);
+    }
+
+    function getPrices(market) {
+      const pinkPool = Number(market.pink_pool);
+      const bluePool = Number(market.blue_pool);
+      const total = pinkPool + bluePool;
+      return {
+        pink: total ? bluePool / total : 0.5,
+        blue: total ? pinkPool / total : 0.5
+      };
+    }
+
+    function estimateTickets(side, amount, market) {
+      if (!market) return 0;
+      const stake = Number(amount || 0);
+      const prices = getPrices(market);
+      const currentPrice = side === "pink" ? prices.pink : prices.blue;
+      if (stake <= 0 || currentPrice <= 0) return 0;
+      return stake / currentPrice;
+    }
+
+    function updateTradeEstimates() {
+      const amount = Number(els.betAmount.value);
+      els.betAmountLabel.textContent = formatCurrency(amount);
+      const pinkTickets = formatShares(estimateTickets("pink", amount, state.market));
+      const blueTickets = formatShares(estimateTickets("blue", amount, state.market));
+      els.tradeHint.textContent = formatCurrency(amount) + " buys about " + pinkTickets + " Pink tickets or " + blueTickets + " Blue tickets.";
+
+      document.querySelectorAll(".chip").forEach((chip) => {
+        chip.classList.toggle("active", Number(chip.dataset.amount) === amount);
+      });
+    }
+
+    function renderWallet() {
+      const wallet = state.wallet;
+      const totalShares = wallet.pinkShares + wallet.blueShares;
+      els.userBalance.textContent = formatCurrency(wallet.balance);
+      els.totalShares.textContent = formatShares(totalShares);
+      els.positionPink.textContent = formatShares(wallet.pinkShares);
+      els.positionBlue.textContent = formatShares(wallet.blueShares);
+      els.pinkShares.textContent = formatShares(wallet.pinkShares);
+      els.blueShares.textContent = formatShares(wallet.blueShares);
+    }
+
+    function renderMarket() {
+      if (!state.market) return;
+      const prices = getPrices(state.market);
+      els.pinkPrice.textContent = formatCurrency(prices.pink);
+      els.bluePrice.textContent = formatCurrency(prices.blue);
+      els.pinkPool.textContent = Number(state.market.pink_pool).toFixed(2);
+      els.bluePool.textContent = Number(state.market.blue_pool).toFixed(2);
+      els.pinkMomentum.textContent = prices.pink >= 0.5 ? "Bullish" : "Off Peak";
+      els.blueMomentum.textContent = prices.blue >= 0.5 ? "Bullish" : "Off Peak";
+      updateTradeEstimates();
+      renderReveal();
+    }
+
+    function renderReveal() {
+      if (!state.market?.revealed || !state.market?.winner) {
+        els.resultBanner.classList.remove("visible");
+        return;
+      }
+
+      const winner = String(state.market.winner).toUpperCase();
+      const winningTickets = state.market.winner === "pink" ? state.wallet.pinkShares : state.wallet.blueShares;
+      const payout = winningTickets;
+      els.resultTitle.textContent = "It's " + winner + "!";
+      els.resultMessage.textContent =
+        (state.market.announcement || ("Congratulations to Team " + winner + ".")) +
+        " Your payout: " + formatCurrency(payout) + ".";
+      els.resultBanner.classList.add("visible");
+    }
+
+    function setBusy(nextBusy) {
+      state.isBusy = nextBusy;
+      const disabled = nextBusy || !state.market || state.market.revealed;
+      els.betPinkBtn.disabled = disabled;
+      els.betBlueBtn.disabled = disabled;
+      els.revealPinkBtn.disabled = disabled;
+      els.revealBlueBtn.disabled = disabled;
+    }
+
+    async function fetchMarket() {
+      const { data, error } = await state.supabase
+        .from("market")
+        .select("*")
+        .eq("id", MARKET_ID)
+        .single();
+
+      if (error) throw error;
+      state.market = data;
+      renderMarket();
+    }
+
+    async function placeBet(side) {
+      if (!state.market || state.market.revealed) return;
+      const amount = Number(els.betAmount.value);
+
+      if (state.wallet.balance < amount) {
+        alert("Insufficient virtual balance for this trade.");
+        return;
+      }
+
+      setBusy(true);
+
+      try {
+        const { data, error } = await state.supabase.rpc("place_market_bet", {
+          p_market_id: MARKET_ID,
+          p_side: side,
+          p_amount: amount
+        });
+
+        if (error) throw error;
+
+        const result = Array.isArray(data) ? data[0] : data;
+        const ticketsBought = estimateTickets(side, amount, state.market);
+
+        state.wallet.balance -= amount;
+        if (side === "pink") {
+          state.wallet.pinkShares += ticketsBought;
+        } else {
+          state.wallet.blueShares += ticketsBought;
+        }
+
+        state.wallet.history.unshift({
+          side,
+          amount,
+          ticketsBought,
+          at: new Date().toISOString()
+        });
+
+        saveWallet();
+        renderWallet();
+        state.market = result;
+        renderMarket();
+        els.tradeHint.textContent = "You bought " + formatShares(ticketsBought) + " " + side.toUpperCase() + " tickets for " + formatCurrency(amount) + ".";
+      } catch (error) {
+        console.error(error);
+        alert("Trade failed. Check Supabase table, RPC, and RLS settings.");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function revealWinner(winner) {
+      if (!state.market) return;
+      setBusy(true);
+
+      const announcement =
+        winner === "pink"
+          ? "Congratulations to Team Pink. The market has resolved in your favor."
+          : "Congratulations to Team Blue. The market has resolved in your favor.";
+
+      try {
+        const { data, error } = await state.supabase
+          .from("market")
+          .update({
+            revealed: true,
+            winner,
+            announcement,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", MARKET_ID)
+          .select()
+          .single();
+
+        if (error) throw error;
+        state.market = data;
+        renderMarket();
+        els.tradeHint.textContent = "Reveal sent to all connected guests: " + winner.toUpperCase() + ".";
+      } catch (error) {
+        console.error(error);
+        alert("Reveal failed. Check Supabase write permissions.");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function bindUI() {
+      els.betAmount.addEventListener("input", updateTradeEstimates);
+      document.querySelectorAll(".chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          els.betAmount.value = chip.dataset.amount;
+          updateTradeEstimates();
+        });
+      });
+
+      els.betPinkBtn.addEventListener("click", () => placeBet("pink"));
+      els.betBlueBtn.addEventListener("click", () => placeBet("blue"));
+      els.revealPinkBtn.addEventListener("click", () => revealWinner("pink"));
+      els.revealBlueBtn.addEventListener("click", () => revealWinner("blue"));
+    }
+
+    async function setupRealtime() {
+      state.channel = state.supabase
+        .channel("market-live")
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "market", filter: "id=eq." + MARKET_ID },
+          (payload) => {
+            state.market = payload.new;
+            renderMarket();
+            const prices = getPrices(payload.new);
+            els.tradeHint.textContent = "Live now: Pink " + formatCurrency(prices.pink) + " and Blue " + formatCurrency(prices.blue) + ".";
+          }
+        )
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
+            els.connectionStatus.textContent = "Realtime connected";
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            els.connectionStatus.textContent = "Realtime degraded";
+          }
+        });
+    }
+
+    async function init() {
+      setBusy(true);
+      renderWallet();
+      bindUI();
+      updateTradeEstimates();
+
+      if (
+        !SUPABASE_URL ||
+        SUPABASE_URL === "YOUR_SUPABASE_URL" ||
+        !SUPABASE_ANON_KEY ||
+        SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY"
+      ) {
+        els.connectionStatus.textContent = "Set Supabase URL and anon key";
+        els.tradeHint.textContent = "Add your Supabase URL and publishable key before going live.";
+        return;
+      }
+
+      try {
+        state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        await fetchMarket();
+        await setupRealtime();
+        els.connectionStatus.textContent = "Connected and synced";
+      } catch (error) {
+        console.error(error);
+        els.connectionStatus.textContent = "Connection failed";
+        els.tradeHint.textContent = error.message || "Unable to initialize the live market.";
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
