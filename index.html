@@ -3,31 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>שוק ניחושי גילוי מין</title>
+  <title>גילוי מין</title>
   <style>
     :root {
       --bg: #f6f1d7;
-      --bg-soft: #efe7c1;
       --panel: rgba(243, 237, 209, 0.9);
-      --panel-strong: rgba(237, 232, 200, 0.96);
       --border: rgba(177, 170, 112, 0.45);
       --text: #5b5630;
       --muted: #8b8559;
       --pink: #e2c84d;
-      --pink-soft: rgba(226, 200, 77, 0.22);
       --blue: #8fc34a;
-      --blue-soft: rgba(143, 195, 74, 0.24);
-      --success: #54d59f;
-      --danger: #ff7c9c;
-      --glow: 0 0 18px rgba(143, 195, 74, 0.14), 0 0 12px rgba(226, 200, 77, 0.14);
       --radius: 22px;
       --radius-sm: 16px;
       --shadow: 0 18px 42px rgba(122, 116, 63, 0.16);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
@@ -41,12 +32,12 @@
       font-family: "Trebuchet MS", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    body {
-      padding: 18px;
-    }
+    body { padding: 18px; }
+
+    button, input, select { font: inherit; }
 
     .shell {
-      max-width: 1180px;
+      max-width: 560px;
       margin: 0 auto;
       display: grid;
       gap: 18px;
@@ -54,8 +45,7 @@
 
     .topbar,
     .card,
-    .admin-panel,
-    .result-banner {
+    .admin-panel {
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       background: var(--panel);
@@ -65,79 +55,50 @@
     }
 
     .topbar {
-      padding: 20px 22px;
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
       position: sticky;
       top: 18px;
       z-index: 20;
     }
 
-    .brand {
-      display: grid;
-      gap: 8px;
-    }
-
-    .eyebrow {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.22em;
-      font-size: 0.72rem;
-    }
-
     h1 {
       margin: 0;
-      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
       letter-spacing: -0.04em;
     }
 
-    .subline {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
     .status-pill {
-      padding: 11px 14px;
+      padding: 9px 14px;
       border-radius: 999px;
       border: 1px solid var(--border);
       color: var(--muted);
       white-space: nowrap;
       background: rgba(244, 239, 212, 0.84);
+      font-size: 0.82rem;
     }
 
-    .dashboard,
-    .left-col,
-    .right-col {
-      display: grid;
-      gap: 18px;
-    }
-
-    .market-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-
+    /* Gauge */
     .gauge-card {
-      padding: 18px 20px;
+      padding: 20px 22px;
       display: grid;
       gap: 14px;
     }
 
-    .gauge-head,
-    .gauge-legend {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+    .section-title {
+      margin: 0;
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
     .gauge-track {
       width: 100%;
-      height: 22px;
+      height: 30px;
       border-radius: 999px;
       overflow: hidden;
       border: 1px solid var(--border);
@@ -147,634 +108,361 @@
 
     .gauge-fill {
       height: 100%;
-      transition: width 0.25s ease;
+      transition: width 0.4s ease;
     }
 
     .gauge-fill.girl {
-      background: linear-gradient(90deg, rgba(226, 200, 77, 0.95), rgba(239, 225, 132, 0.95));
+      background: linear-gradient(90deg, #d4b830, #f0d975);
     }
 
     .gauge-fill.boy {
-      background: linear-gradient(90deg, rgba(143, 195, 74, 0.95), rgba(190, 223, 132, 0.95));
+      background: linear-gradient(90deg, #78b038, #aad870);
+    }
+
+    .gauge-legend {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .legend-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: 999px;
       background: rgba(240, 234, 202, 0.78);
       border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.92rem;
+      font-size: 0.95rem;
     }
 
     .legend-dot {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 999px;
       display: inline-block;
     }
 
-    .legend-dot.girl {
-      background: var(--pink);
-    }
+    .legend-dot.girl { background: var(--pink); }
+    .legend-dot.boy { background: var(--blue); }
 
-    .legend-dot.boy {
-      background: var(--blue);
-    }
+    /* Vote card */
+    .trade-card { padding: 28px 22px; }
 
-    .market-card {
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .market-card::after {
-      content: "";
-      position: absolute;
-      inset: auto -20% -55% auto;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      filter: blur(18px);
-      opacity: 0.22;
-      pointer-events: none;
-    }
-
-    .market-card.pink::after {
-      background: var(--pink);
-    }
-
-    .market-card.blue::after {
-      background: var(--blue);
-    }
-
-    .market-card header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 22px;
-    }
-
-    .tag {
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      border: 1px solid currentColor;
-      background: rgba(248, 242, 215, 0.74);
-    }
-
-    .pink .tag,
-    .pink .price,
-    .pink .accent {
-      color: var(--pink);
-    }
-
-    .blue .tag,
-    .blue .price,
-    .blue .accent {
-      color: var(--blue);
-    }
-
-    .price {
-      font-size: clamp(2.4rem, 5vw, 4rem);
-      font-weight: 700;
-      letter-spacing: -0.05em;
-      line-height: 1;
-      text-shadow: var(--glow);
-      filter: saturate(0.88);
-    }
-
-    .pool-grid,
-    .stats-grid,
-    .position-row {
-      display: grid;
-      gap: 14px;
-    }
-
-    .pool-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      margin-top: 20px;
-    }
-
-    .mini-stat,
-    .stat-box,
-    .position-box {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: rgba(241, 236, 205, 0.8);
-      padding: 14px 16px;
-    }
-
-    .label {
-      color: var(--muted);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      margin-bottom: 8px;
-    }
-
-    .value {
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-
-    .trade-card,
-    .wallet-card {
-      padding: 22px;
-    }
-
-    .details-wrap {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .details-wrap summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 18px 20px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .details-wrap summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .details-wrap summary::after {
-      content: "+";
-      float: right;
-      color: var(--muted);
-    }
-
-    .details-wrap[open] summary::after {
-      content: "-";
-    }
-
-    .details-body {
-      padding: 0 18px 18px;
-      display: grid;
-      gap: 18px;
-    }
-
-    .section-title {
-      margin: 0 0 14px;
-      font-size: 1rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .stats-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .position-row {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .trade-controls {
-      display: grid;
-      gap: 14px;
-    }
-
-    .trade-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .amount-wrap {
-      display: grid;
-      gap: 10px;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--blue);
-      cursor: pointer;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    .action-btn,
-    .admin-btn {
-      border: 1px solid var(--border);
-      color: var(--text);
-      background: rgba(240, 234, 201, 0.84);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-    }
-
-    .action-grid,
-    .admin-actions {
-      display: grid;
-      gap: 12px;
-    }
+    .trade-controls { display: grid; gap: 20px; }
 
     .action-grid {
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .action-btn,
-    .admin-btn {
-      padding: 15px 16px;
-      font-weight: 700;
+      gap: 16px;
     }
 
     .action-btn {
-      min-height: 86px;
-      font-size: 1.08rem;
-      border-radius: 20px;
-      letter-spacing: 0.01em;
+      min-height: 150px;
+      border: 2px solid var(--border);
+      color: var(--text);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease, filter 0.16s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-emoji {
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .btn-label {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
     .action-btn.pink {
-      border-color: rgba(226, 200, 77, 0.46);
-      background: linear-gradient(180deg, rgba(243, 231, 154, 0.94), rgba(245, 238, 189, 0.98));
-      box-shadow: 0 10px 22px rgba(226, 200, 77, 0.16);
+      border-color: rgba(226, 200, 77, 0.52);
+      background: linear-gradient(160deg, rgba(243, 231, 154, 0.96), rgba(252, 246, 210, 0.99));
+      box-shadow: 0 8px 24px rgba(226, 200, 77, 0.22);
     }
 
     .action-btn.blue {
-      border-color: rgba(143, 195, 74, 0.46);
-      background: linear-gradient(180deg, rgba(208, 232, 166, 0.94), rgba(229, 241, 200, 0.98));
-      box-shadow: 0 10px 22px rgba(143, 195, 74, 0.16);
+      border-color: rgba(143, 195, 74, 0.52);
+      background: linear-gradient(160deg, rgba(190, 232, 140, 0.96), rgba(220, 244, 192, 0.99));
+      box-shadow: 0 8px 24px rgba(143, 195, 74, 0.22);
     }
 
-    .action-btn:hover,
-    .admin-btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(177, 170, 112, 0.56);
+    .action-btn:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.02);
     }
 
-    .action-btn.active {
-      transform: translateY(-1px);
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28);
+    .action-btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.98);
     }
 
-    .action-btn span {
-      display: block;
-      font-size: 0.84rem;
-      font-weight: 500;
-      opacity: 0.82;
-      margin-top: 6px;
+    .action-btn.choice-highlight {
+      border-width: 3px;
+      transform: translateY(-4px) scale(1.03) !important;
     }
 
-    .action-btn:disabled,
-    .admin-btn:disabled,
-    input:disabled {
-      opacity: 0.45;
+    .action-btn.pink.choice-highlight {
+      border-color: #c8a820;
+      box-shadow: 0 0 0 6px rgba(226, 200, 77, 0.26), 0 14px 36px rgba(226, 200, 77, 0.32);
+    }
+
+    .action-btn.blue.choice-highlight {
+      border-color: #5a9c18;
+      box-shadow: 0 0 0 6px rgba(143, 195, 74, 0.3), 0 14px 36px rgba(143, 195, 74, 0.32);
+    }
+
+    .choice-dim {
+      opacity: 0.38 !important;
+      transform: scale(0.96) !important;
+      filter: saturate(0.5);
+    }
+
+    .action-btn:disabled {
       cursor: not-allowed;
-      transform: none;
-    }
-
-    .muted {
-      color: var(--muted);
     }
 
     .simple-note {
       border: 1px dashed var(--border);
       border-radius: var(--radius-sm);
       background: rgba(236, 231, 196, 0.8);
-      padding: 14px 16px;
+      padding: 14px 18px;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 1rem;
       line-height: 1.45;
-    }
-
-    .confetti-burst {
-      position: fixed;
-      inset: 0;
-      min-height: 100vh;
-      border: none;
-      border-radius: 0;
-      background:
-        radial-gradient(circle at 8% 18%, rgba(226, 200, 77, 1) 0 14px, transparent 15px),
-        radial-gradient(circle at 18% 72%, rgba(143, 195, 74, 1) 0 13px, transparent 14px),
-        radial-gradient(circle at 28% 28%, rgba(255, 160, 90, 1) 0 12px, transparent 13px),
-        radial-gradient(circle at 42% 78%, rgba(255, 220, 120, 1) 0 14px, transparent 15px),
-        radial-gradient(circle at 56% 20%, rgba(143, 195, 74, 1) 0 12px, transparent 13px),
-        radial-gradient(circle at 68% 68%, rgba(226, 200, 77, 1) 0 14px, transparent 15px),
-        radial-gradient(circle at 79% 25%, rgba(255, 160, 90, 1) 0 12px, transparent 13px),
-        radial-gradient(circle at 90% 76%, rgba(143, 195, 74, 1) 0 14px, transparent 15px),
-        linear-gradient(135deg, rgba(252, 247, 190, 0.22), rgba(220, 240, 170, 0.16));
-      overflow: hidden;
-      pointer-events: none;
-      z-index: 9200;
-      box-shadow: inset 0 0 120px rgba(255, 255, 255, 0.2);
-      opacity: 0.92;
-    }
-
-    .confetti-burst::before,
-    .confetti-burst::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 14% 16%, rgba(255, 255, 255, 0.95) 0 10px, transparent 11px),
-        radial-gradient(circle at 24% 58%, rgba(255, 255, 255, 0.9) 0 9px, transparent 10px),
-        radial-gradient(circle at 37% 34%, rgba(255, 255, 255, 0.92) 0 8px, transparent 9px),
-        radial-gradient(circle at 52% 82%, rgba(255, 255, 255, 0.88) 0 9px, transparent 10px),
-        radial-gradient(circle at 66% 40%, rgba(255, 255, 255, 0.92) 0 10px, transparent 11px),
-        radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.95) 0 8px, transparent 9px),
-        radial-gradient(circle at 88% 64%, rgba(255, 255, 255, 0.9) 0 10px, transparent 11px);
-      opacity: 0;
-    }
-
-    .confetti-burst.active::before {
-      animation: confetti-pop 1400ms ease-out forwards;
-    }
-
-    .confetti-burst.active::after {
-      animation: confetti-pop 1800ms ease-out 120ms forwards;
-    }
-
-    @keyframes confetti-pop {
-      0% {
-        opacity: 0;
-        transform: scale(0.86) translateY(40px) rotate(0deg);
-      }
-
-      15% {
-        opacity: 1;
-      }
-
-      100% {
-        opacity: 0;
-        transform: scale(1.15) translateY(-110px) rotate(10deg);
-      }
-    }
-
-    .choice-highlight {
-      border-width: 3px !important;
-      border-color: #6aa620 !important;
-      transform: translateY(-2px) scale(1.02);
-      box-shadow:
-        0 0 0 6px rgba(143, 195, 74, 0.28),
-        0 0 36px rgba(143, 195, 74, 0.28),
-        inset 0 0 0 999px rgba(255, 255, 255, 0.12) !important;
-      filter: saturate(1.08) brightness(1.04);
-    }
-
-    .choice-dim {
-      opacity: 0.48 !important;
-      transform: scale(0.98);
-      filter: saturate(0.72);
-    }
-
-    .result-banner {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9000;
-      padding: 24px;
-      background: rgba(91, 86, 48, 0.28);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .result-banner.visible {
-      display: flex;
-    }
-
-    .result-popup {
-      min-width: min(92vw, 720px);
-      position: relative;
-      z-index: 9100;
-      padding: 34px 28px;
-      border-radius: 30px;
-      border: 2px solid rgba(226, 200, 77, 0.5);
-      background: linear-gradient(135deg, rgba(251, 247, 192, 0.97), rgba(223, 239, 170, 0.97));
-      box-shadow: 0 30px 80px rgba(91, 86, 48, 0.28);
       text-align: center;
     }
 
-    .result-banner h2 {
-      margin: 0;
-      font-size: clamp(2.4rem, 9vw, 5.6rem);
-      line-height: 1;
-      letter-spacing: -0.05em;
-      color: #5b5630;
-      text-shadow: 0 0 24px rgba(255, 255, 255, 0.45);
-    }
-
+    /* Admin */
     .admin-panel {
-      padding: 20px 22px;
-      margin-top: 2px;
-      display: grid;
-      gap: 14px;
-      opacity: 0.9;
-    }
-
-    .admin-gate {
+      padding: 18px 22px;
       display: grid;
       gap: 12px;
     }
 
-    .hidden {
-      display: none !important;
+    .terminal-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .admin-gate, .admin-actions {
+      display: grid;
+      gap: 10px;
     }
 
     .admin-actions {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .admin-btn {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(240, 234, 201, 0.84);
+      border-radius: 14px;
+      cursor: pointer;
+      padding: 13px 16px;
+      font-weight: 700;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .admin-btn:hover:not(:disabled) { transform: translateY(-1px); }
+
+    .admin-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .hidden { display: none !important; }
+
     .footer-note {
       color: var(--muted);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       text-align: center;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
 
-    .terminal-line {
+    /* ── Full-screen reveal ── */
+    .result-banner {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .result-banner.visible {
       display: flex;
-      justify-content: space-between;
+      animation: reveal-in 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .result-banner.winner-pink {
+      background: radial-gradient(circle at 40% 40%, #f8e060 0%, #e8a820 45%, #c07800 100%);
+    }
+
+    .result-banner.winner-blue {
+      background: radial-gradient(circle at 40% 40%, #9ae050 0%, #58b020 45%, #2a7800 100%);
+    }
+
+    @keyframes reveal-in {
+      0%  { opacity: 0; transform: scale(1.1); }
+      100%{ opacity: 1; transform: scale(1); }
+    }
+
+    .result-content {
+      position: relative;
+      z-index: 9100;
+      text-align: center;
+      display: grid;
       gap: 14px;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: 0.92rem;
+      justify-items: center;
+      animation: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+      padding: 24px;
     }
 
-    @media (max-width: 980px) {
+    @keyframes pop-in {
+      0%  { opacity: 0; transform: scale(0.5) translateY(30px); }
+      100%{ opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    .result-emoji-big {
+      font-size: clamp(5rem, 20vw, 10rem);
+      line-height: 1;
+      animation: float 2.4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50%       { transform: translateY(-18px) rotate(3deg); }
+    }
+
+    .result-banner h2 {
+      margin: 0;
+      font-size: clamp(3.8rem, 14vw, 9rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: #fff;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.28), 0 0 80px rgba(255,255,255,0.5);
+      line-height: 1;
+      animation: pulse-text 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse-text {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.05); }
+    }
+
+    .result-sub {
+      margin: 0;
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      color: rgba(255,255,255,0.9);
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .result-tap-hint {
+      margin: 0;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 8px;
+    }
+
+    /* Confetti particles (created via JS) */
+    @keyframes confetti-fall {
+      0%   { transform: translateY(-10px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(110vh) rotate(600deg); opacity: 0; }
+    }
+
+    @keyframes confetti-sway {
+      0%   { transform: translateY(-10px) translateX(0)    rotate(0deg);   opacity: 1; }
+      40%  { transform: translateY(44vh)  translateX(28px) rotate(280deg); opacity: 1; }
+      100% { transform: translateY(110vh) translateX(-18px)rotate(600deg); opacity: 0; }
+    }
+
+    /* Responsive */
     @media (max-width: 760px) {
-      body {
-        padding: 12px;
-      }
+      body { padding: 12px; }
 
       .topbar {
         position: static;
-        padding: 18px;
+        padding: 16px 18px;
         flex-direction: column;
         align-items: flex-start;
+        gap: 8px;
       }
 
-      .market-grid,
-      .stats-grid,
-      .position-row,
-      .admin-actions,
-      .action-grid {
-        grid-template-columns: 1fr;
-      }
+      .action-btn   { min-height: 160px; }
+      .btn-emoji    { font-size: 3.4rem; }
+      .btn-label    { font-size: 2.4rem; }
 
-      .trade-card,
-      .market-card {
-        padding: 18px;
-      }
-
-      .details-wrap summary {
-        padding: 16px 18px;
-      }
-
-      .details-body {
-        padding: 0 16px 16px;
-      }
-
-      .action-btn {
-        min-height: 102px;
-        font-size: 1.18rem;
-      }
-
-      .trade-header {
-        align-items: flex-start;
-      }
+      .admin-actions { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="shell">
+
     <section class="topbar">
-      <div class="brand">
-        <div></div>
-        <h1>מה ניץ מבשלת?</h1>
-      </div>
-      <div class="status-pill" id="connectionStatus">מתחבר ל־Supabase...</div>
+      <h1>מה ניץ מבשלת?</h1>
+      <div class="status-pill" id="connectionStatus">מתחבר...</div>
     </section>
 
+    <!-- Full-screen reveal overlay -->
     <section class="result-banner" id="resultBanner">
-      <div class="result-popup">
+      <div class="result-content">
+        <div class="result-emoji-big" id="resultEmoji">🎀</div>
         <h2 id="resultTitle">זו בת!</h2>
+        <p class="result-sub" id="resultSub"></p>
+        <p class="result-tap-hint">לחצו להסרת המסך</p>
       </div>
     </section>
 
+    <!-- Live gauge -->
     <section class="card gauge-card">
-      <div class="gauge-head">
-        <div class="section-title" style="margin-bottom: 0;">ניחושים בזמן אמת</div>
-      </div>
+      <div class="section-title">ניחושים בזמן אמת</div>
       <div class="gauge-track" aria-label="Live odds gauge">
         <div class="gauge-fill girl" id="girlGauge" style="width: 50%;"></div>
-        <div class="gauge-fill boy" id="boyGauge" style="width: 50%;"></div>
+        <div class="gauge-fill boy"  id="boyGauge"  style="width: 50%;"></div>
       </div>
       <div class="gauge-legend">
-        <div class="legend-pill"><span class="legend-dot girl"></span>בת <strong id="girlGaugeLabel">50%</strong></div>
-        <div class="legend-pill"><span class="legend-dot boy"></span>בן <strong id="boyGaugeLabel">50%</strong></div>
+        <div class="legend-pill"><span class="legend-dot girl"></span>בת&nbsp;<strong id="girlGaugeLabel">50%</strong></div>
+        <div class="legend-pill"><span class="legend-dot boy"></span>בן&nbsp;<strong id="boyGaugeLabel">50%</strong></div>
       </div>
     </section>
 
-    <section class="dashboard">
-      <div class="left-col">
-        <article class="card trade-card">
-          <div class="trade-controls">
-            <div class="trade-header">
-              <div>
-                <h2 class="section-title">בחרו צד</h2>
-              </div>
-            </div>
-
-            <div class="action-grid">
-              <button class="action-btn pink" id="betPinkBtn">בת</button>
-              <button class="action-btn blue" id="betBlueBtn">בן</button>
-            </div>
-
-            <div class="simple-note" id="tradeHint">לחצו פעם אחת כדי לנעול את הבחירה.</div>
-            <div class="simple-note confetti-burst hidden" id="celebrationBox" aria-hidden="true"></div>
-          </div>
-        </article>
-      </div>
-
-      <div class="right-col">
-        <details class="details-wrap">
-          <summary>פרטים</summary>
-          <div class="details-body">
-            <div class="market-grid">
-              <article class="card market-card pink">
-                <header>
-                  <div>
-                    <div class="tag">בת</div>
-                  </div>
-                  <div class="accent" id="pinkMomentum">חם</div>
-                </header>
-                <div class="price" id="pinkPrice">$0.50</div>
-                <div class="pool-grid">
-                  <div class="mini-stat">
-                    <div class="label">קולות</div>
-                    <div class="value" id="pinkShares">0</div>
-                  </div>
-                </div>
-              </article>
-
-              <article class="card market-card blue">
-                <header>
-                  <div>
-                    <div class="tag">בן</div>
-                  </div>
-                  <div class="accent" id="blueMomentum">חם</div>
-                </header>
-                <div class="price" id="bluePrice">$0.50</div>
-                <div class="pool-grid">
-                  <div class="mini-stat">
-                    <div class="label">קולות</div>
-                    <div class="value" id="blueShares">0</div>
-                  </div>
-                </div>
-              </article>
-            </div>
-
-            <article class="card wallet-card">
-              <h2 class="section-title">הבחירה שלך</h2>
-              <div class="stats-grid">
-                <div class="stat-box">
-                  <div class="label">בחירה</div>
-                  <div class="value" id="userBalance">אין</div>
-                </div>
-                <div class="stat-box">
-                  <div class="label">נעול</div>
-                  <div class="value" id="totalShares">לא</div>
-                </div>
-              </div>
-              <div class="position-row" style="margin-top: 14px;">
-                <div class="position-box">
-                  <div class="label">בת</div>
-                  <div class="value" id="positionPink">-</div>
-                </div>
-                <div class="position-box">
-                  <div class="label">בן</div>
-                  <div class="value" id="positionBlue">-</div>
-                </div>
-              </div>
-            </article>
-          </div>
-        </details>
+    <!-- Vote card -->
+    <section class="card trade-card">
+      <div class="trade-controls">
+        <div class="section-title" style="text-align:center;">מה הניחוש שלכם?</div>
+        <div class="action-grid">
+          <button class="action-btn pink" id="betPinkBtn">
+            <div class="btn-emoji">👧</div>
+            <div class="btn-label">בת</div>
+          </button>
+          <button class="action-btn blue" id="betBlueBtn">
+            <div class="btn-emoji">👦</div>
+            <div class="btn-label">בן</div>
+          </button>
+        </div>
+        <div class="simple-note" id="tradeHint">לחצו פעם אחת כדי לנעול את הבחירה.</div>
       </div>
     </section>
 
+    <!-- Admin panel -->
     <section class="admin-panel">
       <div class="terminal-line">
         <strong>פאנל ניהול</strong>
@@ -785,79 +473,67 @@
       </div>
       <div id="adminControls" class="hidden">
         <div class="admin-actions">
-          <button class="admin-btn" id="revealPinkBtn">חשוף בת</button>
-          <button class="admin-btn" id="revealBlueBtn">חשוף בן</button>
-          <button class="admin-btn" id="resetMarketBtn">אפס שוק</button>
+          <button class="admin-btn" id="revealPinkBtn">חשוף בת 👧</button>
+          <button class="admin-btn" id="revealBlueBtn">חשוף בן 👦</button>
+          <button class="admin-btn" id="resetMarketBtn">אפס</button>
           <button class="admin-btn" id="resetWalletBtn">אפס את הבחירה שלי</button>
         </div>
       </div>
     </section>
 
-    <div class="footer-note">אפליקציה בקובץ יחיד: פרסמו אותה באחסון סטטי וחברו לפרויקט Supabase שלכם.</div>
+    <div class="footer-note">גילוי מין 2026 ✨</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = "https://pyaqlhumyhvsutamhwmb.supabase.co";
+    const SUPABASE_URL    = "https://pyaqlhumyhvsutamhwmb.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_DIejNqBd3o6wIjuxDGWp2A_an9icl7t";
-    const ADMIN_PASSCODE = "babylove2026";
-    const MARKET_ID = 1;
-    const STORAGE_KEY = "gender-reveal-market-vote-v3";
-    const DEFAULT_WALLET = { vote: null, locked: false, history: [] };
-    const SIDE_LABELS = { pink: "בת", blue: "בן" };
+    const ADMIN_PASSCODE  = "babylove2026";
+    const MARKET_ID       = 1;
+    const STORAGE_KEY     = "gender-reveal-market-vote-v3";
+    const DEFAULT_WALLET  = { vote: null, locked: false, history: [] };
+    const SIDE_LABELS     = { pink: "בת", blue: "בן" };
 
     const els = {
       connectionStatus: document.getElementById("connectionStatus"),
-      pinkPrice: document.getElementById("pinkPrice"),
-      bluePrice: document.getElementById("bluePrice"),
-      girlGauge: document.getElementById("girlGauge"),
-      boyGauge: document.getElementById("boyGauge"),
-      girlGaugeLabel: document.getElementById("girlGaugeLabel"),
-      boyGaugeLabel: document.getElementById("boyGaugeLabel"),
-      pinkPool: document.getElementById("pinkPool"),
-      bluePool: document.getElementById("bluePool"),
-      pinkShares: document.getElementById("pinkShares"),
-      blueShares: document.getElementById("blueShares"),
-      userBalance: document.getElementById("userBalance"),
-      totalShares: document.getElementById("totalShares"),
-      positionPink: document.getElementById("positionPink"),
-      positionBlue: document.getElementById("positionBlue"),
-      tradeHint: document.getElementById("tradeHint"),
-      celebrationBox: document.getElementById("celebrationBox"),
-      betPinkBtn: document.getElementById("betPinkBtn"),
-      betBlueBtn: document.getElementById("betBlueBtn"),
-      adminGate: document.getElementById("adminGate"),
-      adminControls: document.getElementById("adminControls"),
-      adminUnlockBtn: document.getElementById("adminUnlockBtn"),
-      revealPinkBtn: document.getElementById("revealPinkBtn"),
-      revealBlueBtn: document.getElementById("revealBlueBtn"),
-      resetMarketBtn: document.getElementById("resetMarketBtn"),
-      resetWalletBtn: document.getElementById("resetWalletBtn"),
-      resultBanner: document.getElementById("resultBanner"),
-      resultTitle: document.getElementById("resultTitle"),
-      pinkMomentum: document.getElementById("pinkMomentum"),
-      blueMomentum: document.getElementById("blueMomentum")
+      girlGauge:        document.getElementById("girlGauge"),
+      boyGauge:         document.getElementById("boyGauge"),
+      girlGaugeLabel:   document.getElementById("girlGaugeLabel"),
+      boyGaugeLabel:    document.getElementById("boyGaugeLabel"),
+      tradeHint:        document.getElementById("tradeHint"),
+      betPinkBtn:       document.getElementById("betPinkBtn"),
+      betBlueBtn:       document.getElementById("betBlueBtn"),
+      adminGate:        document.getElementById("adminGate"),
+      adminControls:    document.getElementById("adminControls"),
+      adminUnlockBtn:   document.getElementById("adminUnlockBtn"),
+      revealPinkBtn:    document.getElementById("revealPinkBtn"),
+      revealBlueBtn:    document.getElementById("revealBlueBtn"),
+      resetMarketBtn:   document.getElementById("resetMarketBtn"),
+      resetWalletBtn:   document.getElementById("resetWalletBtn"),
+      resultBanner:     document.getElementById("resultBanner"),
+      resultTitle:      document.getElementById("resultTitle"),
+      resultEmoji:      document.getElementById("resultEmoji"),
+      resultSub:        document.getElementById("resultSub"),
     };
 
     const state = {
-      wallet: loadWallet(),
-      market: null,
-      channel: null,
-      supabase: null,
-      isBusy: false,
-      isAdmin: false,
-      selectedSide: "pink",
-      celebrationTimer: null,
-      revealTimer: null
+      wallet:           loadWallet(),
+      market:           null,
+      channel:          null,
+      supabase:         null,
+      isBusy:           false,
+      isAdmin:          false,
+      revealTimer:      null,
+      confettiNode:     null,
     };
+
+    /* ── Wallet helpers ── */
 
     function loadWallet() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw ? { ...DEFAULT_WALLET, ...JSON.parse(raw) } : { ...DEFAULT_WALLET };
-      } catch (error) {
-        return { ...DEFAULT_WALLET };
-      }
+      } catch { return { ...DEFAULT_WALLET }; }
     }
 
     function saveWallet() {
@@ -871,74 +547,82 @@
       renderReveal();
     }
 
-    function formatCurrency(value) {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(Number(value || 0));
-    }
-
-    function formatShares(value) {
-      return Number(value || 0).toFixed(0);
-    }
-
-    function sideLabel(side) {
-      return SIDE_LABELS[side] || side;
-    }
+    function sideLabel(side) { return SIDE_LABELS[side] || side; }
 
     function getPrices(market) {
-      const pinkPool = Number(market.pink_pool);
-      const bluePool = Number(market.blue_pool);
-      const total = pinkPool + bluePool;
-      return {
-        pink: total ? bluePool / total : 0.5,
-        blue: total ? pinkPool / total : 0.5
-      };
+      const p = Number(market.pink_pool), b = Number(market.blue_pool), t = p + b;
+      return { pink: t ? b / t : 0.5, blue: t ? p / t : 0.5 };
     }
 
-    function updateTradeEstimates() {
-      els.tradeHint.textContent = state.wallet.locked ? "הבחירה שלך נעולה." : "לחצו פעם אחת כדי לנעול את הבחירה.";
-      els.betPinkBtn.classList.toggle("active", state.selectedSide === "pink");
-      els.betBlueBtn.classList.toggle("active", state.selectedSide === "blue");
+    /* ── Confetti ── */
+
+    function launchConfetti(isGirl) {
+      if (state.confettiNode) { state.confettiNode.remove(); state.confettiNode = null; }
+
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:9300;overflow:hidden;";
+      document.body.appendChild(wrap);
+      state.confettiNode = wrap;
+
+      const palette = isGirl
+        ? ["#e2c84d","#f5d742","#fff","#ffeeaa","#ffd700","#fff5cc","#f0c030"]
+        : ["#8fc34a","#b0d970","#fff","#d4f0a0","#5daa20","#efffcc","#78b838"];
+
+      for (let i = 0; i < 110; i++) {
+        const el    = document.createElement("div");
+        const size  = Math.random() * 13 + 6;
+        const x     = Math.random() * 100;
+        const delay = Math.random() * 1.4;
+        const dur   = Math.random() * 2.8 + 2;
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        const round = Math.random() > 0.45;
+        const anim  = Math.random() > 0.5 ? "confetti-fall" : "confetti-sway";
+
+        el.style.cssText = [
+          "position:absolute",
+          `width:${size}px`,
+          `height:${round ? size : size * 0.45}px`,
+          `background:${color}`,
+          `border-radius:${round ? "50%" : "3px"}`,
+          `left:${x}%`,
+          "top:-20px",
+          `animation:${anim} ${dur}s ease-in ${delay}s forwards`,
+        ].join(";");
+        wrap.appendChild(el);
+      }
+
+      setTimeout(() => {
+        if (state.confettiNode === wrap) { wrap.remove(); state.confettiNode = null; }
+      }, 5500);
+    }
+
+    /* ── Render functions ── */
+
+    function updateTradeHint() {
+      if (state.wallet.locked) {
+        els.tradeHint.textContent = "בחרת ב" + sideLabel(state.wallet.vote) + " — הבחירה נעולה ✓";
+      } else {
+        els.tradeHint.textContent = "לחצו פעם אחת כדי לנעול את הבחירה.";
+      }
     }
 
     function renderWallet() {
-      const wallet = state.wallet;
-      els.userBalance.textContent = wallet.vote ? sideLabel(wallet.vote) : "אין";
-      els.totalShares.textContent = wallet.locked ? "כן" : "לא";
-      els.positionPink.textContent = wallet.vote === "pink" ? "נבחר" : "-";
-      els.positionBlue.textContent = wallet.vote === "blue" ? "נבחר" : "-";
-      els.pinkShares.textContent = wallet.vote === "pink" ? "1" : "0";
-      els.blueShares.textContent = wallet.vote === "blue" ? "1" : "0";
-      els.betPinkBtn.classList.toggle("choice-highlight", wallet.vote === "pink");
-      els.betBlueBtn.classList.toggle("choice-highlight", wallet.vote === "blue");
-      els.betPinkBtn.classList.toggle("choice-dim", !!wallet.vote && wallet.vote !== "pink");
-      els.betBlueBtn.classList.toggle("choice-dim", !!wallet.vote && wallet.vote !== "blue");
-      els.positionPink.parentElement.classList.toggle("choice-highlight", wallet.vote === "pink");
-      els.positionBlue.parentElement.classList.toggle("choice-highlight", wallet.vote === "blue");
-      updateTradeEstimates();
+      const { vote } = state.wallet;
+      els.betPinkBtn.classList.toggle("choice-highlight", vote === "pink");
+      els.betBlueBtn.classList.toggle("choice-highlight", vote === "blue");
+      els.betPinkBtn.classList.toggle("choice-dim", !!vote && vote !== "pink");
+      els.betBlueBtn.classList.toggle("choice-dim", !!vote && vote !== "blue");
+      updateTradeHint();
     }
 
     function renderMarket() {
       if (!state.market) return;
       const prices = getPrices(state.market);
-      els.pinkPrice.textContent = formatCurrency(prices.pink);
-      els.bluePrice.textContent = formatCurrency(prices.blue);
-      els.girlGauge.style.width = (prices.pink * 100).toFixed(1) + "%";
-      els.boyGauge.style.width = (prices.blue * 100).toFixed(1) + "%";
+      els.girlGauge.style.width  = (prices.pink * 100).toFixed(1) + "%";
+      els.boyGauge.style.width   = (prices.blue * 100).toFixed(1) + "%";
       els.girlGaugeLabel.textContent = Math.round(prices.pink * 100) + "%";
-      els.boyGaugeLabel.textContent = Math.round(prices.blue * 100) + "%";
-      if (els.pinkPool) {
-        els.pinkPool.textContent = Number(state.market.pink_pool).toFixed(2);
-      }
-      if (els.bluePool) {
-        els.bluePool.textContent = Number(state.market.blue_pool).toFixed(2);
-      }
-      els.pinkMomentum.textContent = prices.pink >= 0.5 ? "חם" : "רגוע";
-      els.blueMomentum.textContent = prices.blue >= 0.5 ? "חם" : "רגוע";
-      updateTradeEstimates();
+      els.boyGaugeLabel.textContent  = Math.round(prices.blue * 100) + "%";
+      updateTradeHint();
       renderReveal();
     }
 
@@ -948,65 +632,54 @@
     }
 
     function renderReveal() {
-      if (state.celebrationTimer) {
-        clearTimeout(state.celebrationTimer);
-        state.celebrationTimer = null;
-      }
-      if (state.revealTimer) {
-        clearTimeout(state.revealTimer);
-        state.revealTimer = null;
-      }
+      if (state.revealTimer) { clearTimeout(state.revealTimer); state.revealTimer = null; }
 
       if (!state.market?.revealed || !state.market?.winner) {
-        els.resultBanner.classList.remove("visible");
-        els.celebrationBox.classList.add("hidden");
-        els.celebrationBox.classList.remove("active");
+        els.resultBanner.classList.remove("visible", "winner-pink", "winner-blue");
+        if (state.confettiNode) { state.confettiNode.remove(); state.confettiNode = null; }
         return;
       }
 
-      const winner = sideLabel(String(state.market.winner));
-      els.resultTitle.textContent = winner === "בת" ? "זו בת!" : "זה בן!";
-      els.resultBanner.classList.add("visible");
-      state.revealTimer = setTimeout(() => {
-        els.resultBanner.classList.remove("visible");
-        state.revealTimer = null;
-      }, 3200);
-      if (state.wallet.vote === state.market.winner) {
-        els.celebrationBox.classList.remove("hidden");
-        els.celebrationBox.classList.remove("active");
-        void els.celebrationBox.offsetWidth;
-        els.celebrationBox.classList.remove("hidden");
-        els.celebrationBox.classList.add("active");
-        state.celebrationTimer = setTimeout(() => {
-          els.celebrationBox.classList.add("hidden");
-          els.celebrationBox.classList.remove("active");
-          state.celebrationTimer = null;
-        }, 2200);
+      const winner = state.market.winner;
+      const isGirl = winner === "pink";
+
+      els.resultTitle.textContent = isGirl ? "זו בת!" : "זה בן!";
+      els.resultEmoji.textContent = isGirl ? "👧" : "👦";
+
+      if (state.wallet.vote) {
+        els.resultSub.textContent = state.wallet.vote === winner ? "ניחשת נכון! 🎉" : "ניחוש שגוי 😅";
       } else {
-        els.celebrationBox.classList.add("hidden");
-        els.celebrationBox.classList.remove("active");
+        els.resultSub.textContent = "";
       }
+
+      els.resultBanner.classList.remove("winner-pink", "winner-blue");
+      els.resultBanner.classList.add("visible", isGirl ? "winner-pink" : "winner-blue");
+
+      launchConfetti(isGirl);
+
+      state.revealTimer = setTimeout(() => {
+        els.resultBanner.classList.remove("visible", "winner-pink", "winner-blue");
+        state.revealTimer = null;
+      }, 9000);
     }
 
     function setBusy(nextBusy) {
       state.isBusy = nextBusy;
       const disabled = nextBusy || !state.market || state.market.revealed || state.wallet.locked;
-      els.betPinkBtn.disabled = disabled;
-      els.betBlueBtn.disabled = disabled;
+      els.betPinkBtn.disabled   = disabled;
+      els.betBlueBtn.disabled   = disabled;
       els.adminUnlockBtn.disabled = nextBusy;
-      els.revealPinkBtn.disabled = disabled || !state.isAdmin;
-      els.revealBlueBtn.disabled = disabled || !state.isAdmin;
+      els.revealPinkBtn.disabled  = disabled || !state.isAdmin;
+      els.revealBlueBtn.disabled  = disabled || !state.isAdmin;
       els.resetMarketBtn.disabled = nextBusy || !state.market || !state.isAdmin;
       els.resetWalletBtn.disabled = nextBusy || !state.isAdmin;
     }
 
+    /* ── Supabase actions ── */
+
     async function fetchMarket() {
       const { data, error } = await state.supabase
-        .from("market")
-        .select("*")
-        .eq("id", MARKET_ID)
-        .single();
-
+        .from("market").select("*").eq("id", MARKET_ID).single();
       if (error) throw error;
       state.market = data;
       renderMarket();
@@ -1014,177 +687,123 @@
 
     async function placeBet(side) {
       if (!state.market || state.market.revealed || state.wallet.locked) return;
-      state.selectedSide = side;
-
       setBusy(true);
-
       try {
         const { data, error } = await state.supabase.rpc("place_market_bet", {
-          p_market_id: MARKET_ID,
-          p_side: side,
-          p_amount: 25
+          p_market_id: MARKET_ID, p_side: side, p_amount: 25
         });
-
         if (error) throw error;
-
-        const result = Array.isArray(data) ? data[0] : data;
-        state.wallet.vote = side;
+        state.wallet.vote   = side;
         state.wallet.locked = true;
-
-        state.wallet.history.unshift({
-          side,
-          at: new Date().toISOString()
-        });
-
+        state.wallet.history.unshift({ side, at: new Date().toISOString() });
         saveWallet();
         renderWallet();
-        state.market = result;
+        state.market = Array.isArray(data) ? data[0] : data;
         renderMarket();
-        els.tradeHint.textContent = "בחרת ב" + sideLabel(side) + ".";
-      } catch (error) {
-        console.error(error);
-        const message = error?.message || "Trade failed. Check Supabase table, RPC, and RLS settings.";
-        els.tradeHint.textContent = message;
-        alert(message);
-      } finally {
-        setBusy(false);
-      }
+      } catch (err) {
+        console.error(err);
+        const msg = err?.message || "אירעה שגיאה. בדקו חיבור.";
+        els.tradeHint.textContent = msg;
+        alert(msg);
+      } finally { setBusy(false); }
     }
 
     async function revealWinner(winner) {
       if (!state.market) return;
       setBusy(true);
-
       try {
         const { data, error } = await state.supabase
           .from("market")
-          .update({
-            revealed: true,
-            winner,
-            announcement: null,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", MARKET_ID)
-          .select()
-          .single();
-
+          .update({ revealed: true, winner, announcement: null, updated_at: new Date().toISOString() })
+          .eq("id", MARKET_ID).select().single();
         if (error) throw error;
         state.market = data;
         renderMarket();
-        els.tradeHint.textContent = "התוצאה נשלחה לכולם: " + sideLabel(winner) + ".";
-      } catch (error) {
-        console.error(error);
-        const message = error?.message || "החשיפה נכשלה. בדקו הרשאות כתיבה.";
-        els.tradeHint.textContent = message;
-        alert(message);
-      } finally {
-        setBusy(false);
-      }
+      } catch (err) {
+        console.error(err);
+        const msg = err?.message || "החשיפה נכשלה.";
+        els.tradeHint.textContent = msg;
+        alert(msg);
+      } finally { setBusy(false); }
     }
 
     async function resetMarket() {
       if (!state.market) return;
       setBusy(true);
-
       try {
         const { data, error } = await state.supabase
           .from("market")
-          .update({
-            pink_pool: 500,
-            blue_pool: 500,
-            revealed: false,
-            winner: null,
-            announcement: null,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", MARKET_ID)
-          .select()
-          .single();
-
+          .update({ pink_pool: 500, blue_pool: 500, revealed: false, winner: null, announcement: null, updated_at: new Date().toISOString() })
+          .eq("id", MARKET_ID).select().single();
         if (error) throw error;
         state.market = data;
         els.tradeHint.textContent = "השוק אופס.";
         renderMarket();
-      } catch (error) {
-        console.error(error);
-        const message = error?.message || "איפוס השוק נכשל.";
-        els.tradeHint.textContent = message;
-        alert(message);
-      } finally {
-        setBusy(false);
-      }
+      } catch (err) {
+        console.error(err);
+        const msg = err?.message || "האיפוס נכשל.";
+        els.tradeHint.textContent = msg;
+        alert(msg);
+      } finally { setBusy(false); }
     }
 
     function unlockAdmin() {
       const input = window.prompt("הכניסו קוד מנהל");
       if (input === null) return;
-      if (input !== ADMIN_PASSCODE) {
-        alert("קוד שגוי.");
-        return;
-      }
-
+      if (input !== ADMIN_PASSCODE) { alert("קוד שגוי."); return; }
       state.isAdmin = true;
       renderAdmin();
       setBusy(state.isBusy);
-      els.tradeHint.textContent = "מצב ניהול נפתח.";
     }
 
+    /* ── Event bindings ── */
+
     function bindUI() {
-      els.betPinkBtn.addEventListener("click", () => placeBet("pink"));
-      els.betBlueBtn.addEventListener("click", () => placeBet("blue"));
-      els.betPinkBtn.addEventListener("pointerenter", () => {
-        state.selectedSide = "pink";
-        updateTradeEstimates();
-      });
-      els.betBlueBtn.addEventListener("pointerenter", () => {
-        state.selectedSide = "blue";
-        updateTradeEstimates();
-      });
+      els.betPinkBtn.addEventListener("click",  () => placeBet("pink"));
+      els.betBlueBtn.addEventListener("click",  () => placeBet("blue"));
       els.adminUnlockBtn.addEventListener("click", unlockAdmin);
-      els.revealPinkBtn.addEventListener("click", () => revealWinner("pink"));
-      els.revealBlueBtn.addEventListener("click", () => revealWinner("blue"));
+      els.revealPinkBtn.addEventListener("click",  () => revealWinner("pink"));
+      els.revealBlueBtn.addEventListener("click",  () => revealWinner("blue"));
       els.resetMarketBtn.addEventListener("click", resetMarket);
       els.resetWalletBtn.addEventListener("click", () => {
         resetLocalWallet();
         els.tradeHint.textContent = "הבחירה במכשיר הזה אופסה.";
       });
+      // Tap to dismiss reveal early
+      els.resultBanner.addEventListener("click", () => {
+        if (state.revealTimer) { clearTimeout(state.revealTimer); state.revealTimer = null; }
+        els.resultBanner.classList.remove("visible", "winner-pink", "winner-blue");
+      });
     }
+
+    /* ── Realtime subscription ── */
 
     async function setupRealtime() {
       state.channel = state.supabase
         .channel("market-live")
-        .on(
-          "postgres_changes",
+        .on("postgres_changes",
           { event: "UPDATE", schema: "public", table: "market", filter: "id=eq." + MARKET_ID },
-          (payload) => {
-            state.market = payload.new;
-            renderMarket();
-            const prices = getPrices(payload.new);
-            els.tradeHint.textContent = "כרגע: בת " + formatCurrency(prices.pink) + " ובן " + formatCurrency(prices.blue) + ".";
-          }
+          (payload) => { state.market = payload.new; renderMarket(); }
         )
         .subscribe((status) => {
           if (status === "SUBSCRIBED") {
-            els.connectionStatus.textContent = "חיבור חי פעיל";
+            els.connectionStatus.textContent = "חיבור חי ✓";
           } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            els.connectionStatus.textContent = "החיבור החי נחלש";
+            els.connectionStatus.textContent = "החיבור נחלש";
           }
         });
     }
+
+    /* ── Boot ── */
 
     async function init() {
       setBusy(true);
       renderWallet();
       renderAdmin();
       bindUI();
-      updateTradeEstimates();
 
-      if (
-        !SUPABASE_URL ||
-        SUPABASE_URL === "YOUR_SUPABASE_URL" ||
-        !SUPABASE_ANON_KEY ||
-        SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY"
-      ) {
+      if (!SUPABASE_URL || SUPABASE_URL === "YOUR_SUPABASE_URL" ||
+          !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
         els.connectionStatus.textContent = "יש להגדיר מפתחות Supabase";
         els.tradeHint.textContent = "הוסיפו את כתובת Supabase ואת המפתח הציבורי.";
         return;
@@ -1194,11 +813,11 @@
         state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         await fetchMarket();
         await setupRealtime();
-        els.connectionStatus.textContent = "מחובר ומסונכרן";
-      } catch (error) {
-        console.error(error);
+        els.connectionStatus.textContent = "מחובר ✓";
+      } catch (err) {
+        console.error(err);
         els.connectionStatus.textContent = "החיבור נכשל";
-        els.tradeHint.textContent = error.message || "לא ניתן להפעיל את השוק החי.";
+        els.tradeHint.textContent = err.message || "לא ניתן להתחבר.";
       } finally {
         setBusy(false);
       }
