@@ -368,15 +368,9 @@
       cursor: pointer;
     }
 
-    .quick-amounts {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-    }
-
     .quick-stats {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
 
@@ -386,7 +380,6 @@
       font: inherit;
     }
 
-    .chip,
     .action-btn,
     .admin-btn {
       border: 1px solid var(--border);
@@ -395,11 +388,6 @@
       border-radius: 14px;
       cursor: pointer;
       transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-    }
-
-    .chip {
-      padding: 10px 0;
-      color: var(--muted);
     }
 
     .action-grid,
@@ -437,17 +425,10 @@
       box-shadow: 0 10px 22px rgba(143, 195, 74, 0.16);
     }
 
-    .chip:hover,
     .action-btn:hover,
     .admin-btn:hover {
       transform: translateY(-1px);
       border-color: rgba(177, 170, 112, 0.56);
-    }
-
-    .chip.active {
-      border-color: rgba(143, 195, 74, 0.5);
-      color: var(--blue);
-      background: rgba(143, 195, 74, 0.16);
     }
 
     .action-btn.active {
@@ -465,7 +446,7 @@
 
     .action-btn:disabled,
     .admin-btn:disabled,
-    .chip:disabled {
+    input:disabled {
       opacity: 0.45;
       cursor: not-allowed;
       transform: none;
@@ -562,10 +543,6 @@
         grid-template-columns: 1fr;
       }
 
-      .quick-amounts {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
       .quick-card,
       .trade-card,
       .market-card {
@@ -633,10 +610,6 @@
               <div class="label">Win</div>
               <div class="value" id="possibleWin">$0.00</div>
             </div>
-            <div class="stat-box">
-              <div class="label">Pick</div>
-              <div class="value" id="currentPick">Girl</div>
-            </div>
           </div>
         </article>
 
@@ -644,18 +617,13 @@
           <div class="trade-controls">
             <div class="trade-header">
               <div>
-                <h2 class="section-title">Pick A Side</h2>
+                <h2 class="section-title">Choose A Side</h2>
               </div>
               <div class="value" id="betAmountLabel">$20</div>
             </div>
 
             <div class="amount-wrap">
               <input id="betAmount" type="range" min="10" max="60" step="10" value="20">
-              <div class="quick-amounts">
-                <button class="chip active" data-amount="20">$20</button>
-                <button class="chip" data-amount="40">$40</button>
-                <button class="chip" data-amount="60">$60</button>
-              </div>
             </div>
 
             <div class="action-grid">
@@ -663,7 +631,7 @@
               <button class="action-btn blue" id="betBlueBtn">Boy</button>
             </div>
 
-            <div class="simple-note" id="tradeHint">Choose an amount and tap a side.</div>
+            <div class="simple-note" id="tradeHint">Move the slider, then tap a side.</div>
           </div>
         </article>
       </div>
@@ -789,7 +757,6 @@
       totalShares: document.getElementById("totalShares"),
       quickBalance: document.getElementById("quickBalance"),
       possibleWin: document.getElementById("possibleWin"),
-      currentPick: document.getElementById("currentPick"),
       positionPink: document.getElementById("positionPink"),
       positionBlue: document.getElementById("positionBlue"),
       betAmount: document.getElementById("betAmount"),
@@ -887,13 +854,9 @@
         ? state.wallet.pinkShares + estimateTickets("pink", amount, state.market)
         : state.wallet.blueShares + estimateTickets("blue", amount, state.market);
       els.possibleWin.textContent = formatCurrency(possibleWin);
-      els.currentPick.textContent = sideLabel(state.selectedSide);
       els.betPinkBtn.classList.toggle("active", state.selectedSide === "pink");
       els.betBlueBtn.classList.toggle("active", state.selectedSide === "blue");
 
-      document.querySelectorAll(".chip").forEach((chip) => {
-        chip.classList.toggle("active", Number(chip.dataset.amount) === amount);
-      });
     }
 
     function renderWallet() {
@@ -1109,12 +1072,6 @@
 
     function bindUI() {
       els.betAmount.addEventListener("input", updateTradeEstimates);
-      document.querySelectorAll(".chip").forEach((chip) => {
-        chip.addEventListener("click", () => {
-          els.betAmount.value = chip.dataset.amount;
-          updateTradeEstimates();
-        });
-      });
 
       els.betPinkBtn.addEventListener("click", () => placeBet("pink"));
       els.betBlueBtn.addEventListener("click", () => placeBet("blue"));
