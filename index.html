@@ -1073,20 +1073,19 @@
       return Object.values(APP.predictions).filter(p => p.market_slug === slug);
     }
 
+    function getMarketBySlug(slug) {
+      return APP.markets.find(m => m.slug === slug) || null;
+    }
+
     // ══════════════════════════════════════════════════════════════════════
     // AMM Calculations
     // ══════════════════════════════════════════════════════════════════════
     function calculateProbabilities(options) {
       if (!options || !Array.isArray(options)) return [];
-      // prob_i = (1/pool_i) / sum(1/pool_j)
-      // Lower pool = more bets = higher probability (correct CPMM semantics)
-      const weights = options.map(opt => {
-        const pool = Number(opt.pool) || 0;
-        return pool > 0 ? 1 / pool : 0;
-      });
-      const totalWeight = weights.reduce((s, w) => s + w, 0);
-      if (totalWeight === 0) return options.map(() => Math.round(100 / options.length));
-      return weights.map(w => Math.round(w / totalWeight * 100));
+      const pools = options.map(opt => Math.max(Number(opt.pool) || 0, 0));
+      const totalPool = pools.reduce((sum, pool) => sum + pool, 0);
+      if (totalPool === 0) return options.map(() => Math.round(100 / options.length));
+      return pools.map(pool => Math.round(pool / totalPool * 100));
     }
 
     function calculateMultipliers(options) {
@@ -1096,8 +1095,17 @@
     }
 
     function currentUserBalance() {
-      const spent = Object.values(APP.predictions).reduce((s, p) => s + (Number(p.amount) || BET_AMOUNT), 0);
-      return STARTING_COINS - spent;
+      const settledWinnings = Object.values(APP.predictions).reduce((sum, prediction) => {
+        const market = getMarketBySlug(prediction.market_slug);
+        if (!market?.revealed || market.winner !== prediction.option_id) return sum;
+        return sum + (Number(prediction.shares) || 0);
+      }, 0);
+
+      const committed = Object.values(APP.predictions).reduce((sum, prediction) => {
+        return sum + (Number(prediction.amount) || BET_AMOUNT);
+      }, 0);
+
+      return STARTING_COINS - committed + settledWinnings;
     }
 
     function maxAffordableBet(balance = currentUserBalance()) {
@@ -1621,6 +1629,7 @@
 
         if (error) throw error;
         APP.markets = data || [];
+        updateCoinDisplay();
         renderMarketGrid();
         renderAdminPanel();
 
@@ -1687,14 +1696,21 @@
     // ══════════════════════════════════════════════════════════════════════
     async function unplaceBet(marketSlug, optionId) {
       try {
-        const { error } = await APP.supabase
-          .from('predictions')
-          .delete()
-          .eq('user_id', APP.userId)
-          .eq('market_slug', marketSlug)
-          .eq('option_id', optionId);
+        const { data, error } = await APP.supabase.rpc('unplace_market_bet', {
+          p_market_slug: marketSlug,
+          p_user_id: APP.userId,
+          p_option_id: optionId
+        });
 
         if (error) throw error;
+
+        const marketData = Array.isArray(data) ? data[0] : data;
+        if (marketData) {
+          const idx = APP.markets.findIndex(m => m.slug === marketSlug);
+          if (idx !== -1) {
+            APP.markets[idx] = { ...APP.markets[idx], ...marketData };
+          }
+        }
 
         delete APP.predictions[predKey(marketSlug, optionId)];
         savePredictions();
@@ -1893,6 +1909,7 @@
               APP.markets.push(payload.new);
             }
 
+            updateCoinDisplay();
             renderMarketGrid();
             renderAdminPanel();
             if (APP.currentView === 'market') {

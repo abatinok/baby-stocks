@@ -57,16 +57,14 @@ DECLARE
   v_options       JSONB;
   v_found         BOOLEAN := FALSE;
   v_chosen_pool   NUMERIC := 0;
-  v_other_pool    NUMERIC := 0;
-  v_k             NUMERIC;
-  v_new_other     NUMERIC;
+  v_total_pool    NUMERIC := 0;
+  v_price         NUMERIC := 0;
   v_new_chosen    NUMERIC;
   v_shares_out    NUMERIC;
   v_new_options   JSONB;
   v_i             INT;
   v_opt           JSONB;
-  v_old_pool      NUMERIC;
-  v_proportional  NUMERIC;
+  v_current_pool  NUMERIC;
   v_total_spent   NUMERIC := 0;
   v_balance       NUMERIC := 0;
   v_result        JSONB;
@@ -108,12 +106,17 @@ BEGIN
     RETURN v_result;
   END IF;
 
-  -- 4. Enforce bankroll.
-  SELECT COALESCE(SUM(amount), 0) INTO v_total_spent
-  FROM public.predictions
-  WHERE user_id = p_user_id;
+  -- 4. Enforce bankroll using the same settled-balance logic as the client.
+  SELECT
+    1000
+    - COALESCE(SUM(p.amount), 0)
+    + COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0)
+  INTO v_balance
+  FROM public.predictions p
+  JOIN public.markets m ON m.slug = p.market_slug
+  WHERE p.user_id = p_user_id;
 
-  v_balance := 1000 - v_total_spent;
+  v_balance := COALESCE(v_balance, 1000);
 
   IF v_balance < p_amount THEN
     RAISE EXCEPTION 'Insufficient balance: have %, need %', v_balance, p_amount;
@@ -123,11 +126,11 @@ BEGIN
   v_options := v_market.options;
   FOR v_i IN 0 .. jsonb_array_length(v_options) - 1 LOOP
     v_opt := v_options -> v_i;
+    v_current_pool := (v_opt ->> 'pool')::NUMERIC;
+    v_total_pool := v_total_pool + v_current_pool;
     IF v_opt ->> 'id' = p_option_id THEN
       v_found := TRUE;
-      v_chosen_pool := (v_opt ->> 'pool')::NUMERIC;
-    ELSE
-      v_other_pool := v_other_pool + (v_opt ->> 'pool')::NUMERIC;
+      v_chosen_pool := v_current_pool;
     END IF;
   END LOOP;
 
@@ -135,45 +138,35 @@ BEGIN
     RAISE EXCEPTION 'Option not found: % in market %', p_option_id, p_market_slug;
   END IF;
 
-  -- 3. Constant-product AMM
-  --    User bets p_amount on option X.
-  --    Money goes into the "against" (other) pool, which lowers the chosen pool.
-  --    chosen_pool * other_pool = k  (invariant)
-  v_k         := v_chosen_pool * v_other_pool;
-  v_new_other := v_other_pool + p_amount;
-  -- guard against zero other_pool (single-option degenerate case)
-  IF v_other_pool = 0 OR v_k = 0 THEN
-    v_shares_out := p_amount;
-    v_new_chosen := v_chosen_pool;
-  ELSE
-    v_new_chosen := v_k / v_new_other;
-    v_shares_out := v_chosen_pool - v_new_chosen;
+  -- 6. Polymarket-style settlement:
+  --    price = chosen_pool / total_pool
+  --    shares bought = amount / price
+  IF v_total_pool <= 0 OR v_chosen_pool <= 0 THEN
+    RAISE EXCEPTION 'Market pricing unavailable for %', p_market_slug;
   END IF;
 
-  -- 4. Rebuild options JSONB with updated pools
+  v_price := v_chosen_pool / v_total_pool;
+  IF v_price <= 0 OR v_price >= 1 THEN
+    RAISE EXCEPTION 'Invalid market price % for %', v_price, p_market_slug;
+  END IF;
+
+  v_shares_out := p_amount / v_price;
+  v_new_chosen := v_chosen_pool + p_amount;
+
+  -- 7. Rebuild options JSONB with updated pools
   v_new_options := '[]'::JSONB;
   FOR v_i IN 0 .. jsonb_array_length(v_options) - 1 LOOP
     v_opt := v_options -> v_i;
     IF v_opt ->> 'id' = p_option_id THEN
-      -- chosen option: pool shrinks
       v_new_options := v_new_options || jsonb_build_array(
         v_opt || jsonb_build_object('pool', ROUND(v_new_chosen, 6))
       );
     ELSE
-      -- other options: distribute p_amount proportionally to their current share
-      v_old_pool := (v_opt ->> 'pool')::NUMERIC;
-      IF v_other_pool > 0 THEN
-        v_proportional := v_old_pool + p_amount * (v_old_pool / v_other_pool);
-      ELSE
-        v_proportional := v_old_pool + p_amount / (jsonb_array_length(v_options) - 1);
-      END IF;
-      v_new_options := v_new_options || jsonb_build_array(
-        v_opt || jsonb_build_object('pool', ROUND(v_proportional, 6))
-      );
+      v_new_options := v_new_options || jsonb_build_array(v_opt);
     END IF;
   END LOOP;
 
-  -- 5. Persist updated market options
+  -- 8. Persist updated market options
   UPDATE public.markets
   SET options    = v_new_options,
       updated_at = NOW()
@@ -184,7 +177,87 @@ BEGIN
   VALUES (p_user_id, p_nickname, p_market_slug, p_option_id, ROUND(v_shares_out, 6), p_amount)
   ;
 
-  -- 7. Return updated market
+  -- 10. Return updated market
+  SELECT row_to_json(m)::JSONB INTO v_result
+  FROM public.markets m
+  WHERE slug = p_market_slug;
+
+  RETURN v_result;
+END;
+$$;
+
+-- ------------------------------------------------------------
+-- 3a. UNPLACE BET FUNCTION
+-- ------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.unplace_market_bet(
+  p_market_slug TEXT,
+  p_user_id     TEXT,
+  p_option_id   TEXT
+) RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_market      public.markets%ROWTYPE;
+  v_prediction  public.predictions%ROWTYPE;
+  v_options     JSONB;
+  v_new_options JSONB := '[]'::JSONB;
+  v_opt         JSONB;
+  v_i           INT;
+  v_result      JSONB;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtext(p_user_id), hashtext('place_market_bet'));
+
+  SELECT * INTO v_market
+  FROM public.markets
+  WHERE slug = p_market_slug
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Market not found: %', p_market_slug;
+  END IF;
+
+  IF v_market.revealed THEN
+    RAISE EXCEPTION 'Market is already revealed: %', p_market_slug;
+  END IF;
+
+  SELECT * INTO v_prediction
+  FROM public.predictions
+  WHERE user_id = p_user_id
+    AND market_slug = p_market_slug
+    AND option_id = p_option_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    SELECT row_to_json(m)::JSONB INTO v_result
+    FROM public.markets m
+    WHERE slug = p_market_slug;
+    RETURN v_result;
+  END IF;
+
+  v_options := v_market.options;
+  FOR v_i IN 0 .. jsonb_array_length(v_options) - 1 LOOP
+    v_opt := v_options -> v_i;
+    IF v_opt ->> 'id' = p_option_id THEN
+      v_new_options := v_new_options || jsonb_build_array(
+        v_opt || jsonb_build_object(
+          'pool',
+          ROUND(GREATEST(0, (v_opt ->> 'pool')::NUMERIC - v_prediction.amount), 6)
+        )
+      );
+    ELSE
+      v_new_options := v_new_options || jsonb_build_array(v_opt);
+    END IF;
+  END LOOP;
+
+  UPDATE public.markets
+  SET options = v_new_options,
+      updated_at = NOW()
+  WHERE slug = p_market_slug;
+
+  DELETE FROM public.predictions
+  WHERE id = v_prediction.id;
+
   SELECT row_to_json(m)::JSONB INTO v_result
   FROM public.markets m
   WHERE slug = p_market_slug;
@@ -231,6 +304,7 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.reset_market(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.unplace_market_bet(TEXT, TEXT, TEXT) TO anon, authenticated;
 
 -- ------------------------------------------------------------
 -- 4. LEADERBOARD VIEW
@@ -243,8 +317,7 @@ SELECT
   COUNT(*) FILTER (WHERE m.revealed)                              AS total_revealed,
   COUNT(*)                                                        AS total_predictions,
   COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0) AS winnings,
-  -- balance only counts bets on revealed markets so it stays hidden until reveals happen
-  1000 - COUNT(*) FILTER (WHERE m.revealed) * 100
+  1000 - COALESCE(SUM(p.amount), 0)
     + COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0)
     AS balance
 FROM public.predictions p
