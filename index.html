@@ -3,19 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>גילוי מין</title>
+  <title>בורסת תינוקות</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f6f1d7;
-      --panel: rgba(243, 237, 209, 0.9);
-      --border: rgba(177, 170, 112, 0.45);
-      --text: #5b5630;
-      --muted: #8b8559;
-      --pink: #e2c84d;
-      --blue: #8fc34a;
+      --panel: rgba(255, 252, 244, 0.93);
+      --border: rgba(170, 148, 100, 0.28);
+      --border-strong: rgba(148, 125, 78, 0.5);
+      --text: #2a2010;
+      --muted: #887060;
+      --muted-light: #b0a080;
+      --honey: #d8a030;
+      --honey-light: #eec868;
+      --sage: #80b888;
+      --sage-light: #aed8b8;
+      --peach: #e88462;
+      --peach-light: #f4b090;
       --radius: 22px;
       --radius-sm: 16px;
-      --shadow: 0 18px 42px rgba(122, 116, 63, 0.16);
+      --shadow: 0 4px 20px rgba(80, 55, 20, 0.1), 0 1px 3px rgba(80, 55, 20, 0.06);
+      --shadow-hover: 0 12px 38px rgba(80, 55, 20, 0.18), 0 2px 6px rgba(80, 55, 20, 0.08);
+      --font: 'Varela Round', sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -23,274 +33,675 @@
     html, body {
       margin: 0;
       min-height: 100%;
-      background:
-        radial-gradient(circle at top left, rgba(226, 200, 77, 0.24), transparent 36%),
-        radial-gradient(circle at top right, rgba(143, 195, 74, 0.24), transparent 36%),
-        radial-gradient(circle at bottom center, rgba(233, 229, 182, 0.82), transparent 46%),
-        linear-gradient(180deg, #f8f4df 0%, #f1ebca 52%, #e6efd5 100%);
+      font-family: var(--font);
       color: var(--text);
-      font-family: "Trebuchet MS", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    body { padding: 18px; }
+    body {
+      background:
+        radial-gradient(ellipse at 16% 10%, rgba(220, 162, 50, 0.22), transparent 40%),
+        radial-gradient(ellipse at 84% 8%, rgba(128, 185, 140, 0.2), transparent 40%),
+        radial-gradient(ellipse at 50% 95%, rgba(232, 132, 98, 0.16), transparent 42%),
+        linear-gradient(158deg, #fef6e0 0%, #f8eeda 36%, #f0f5e8 72%, #e8f4ec 100%);
+      padding: 16px;
+    }
+
+    /* Grain texture */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 10000;
+      mix-blend-mode: multiply;
+    }
 
     button, input, select { font: inherit; }
 
     .shell {
-      max-width: 560px;
+      max-width: 680px;
       margin: 0 auto;
       display: grid;
-      gap: 18px;
+      gap: 14px;
     }
 
-    .topbar,
-    .card,
-    .admin-panel {
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    .glass-panel {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
 
+    /* ── Topbar ── */
     .topbar {
-      padding: 20px 24px;
+      padding: 20px 26px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       position: sticky;
-      top: 18px;
+      top: 16px;
       z-index: 20;
     }
 
+    .topbar-left { display: flex; flex-direction: column; gap: 2px; }
+
     h1 {
       margin: 0;
-      font-size: clamp(1.5rem, 4vw, 2.2rem);
-      letter-spacing: -0.04em;
+      font-family: var(--font);
+      font-size: clamp(1.55rem, 5vw, 2.3rem);
+      letter-spacing: -0.01em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .topbar-tagline {
+      margin: 0;
+      font-size: 0.73rem;
+      color: var(--muted-light);
+      letter-spacing: 0.04em;
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .status-pill {
-      padding: 9px 14px;
+      padding: 6px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
       color: var(--muted);
       white-space: nowrap;
-      background: rgba(244, 239, 212, 0.84);
-      font-size: 0.82rem;
+      background: rgba(238, 222, 178, 0.5);
+      font-size: 0.77rem;
     }
 
-    /* Gauge */
-    .gauge-card {
-      padding: 20px 22px;
-      display: grid;
-      gap: 14px;
+    .coin-pill {
+      padding: 6px 13px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(216, 160, 48, 0.2), rgba(238, 200, 104, 0.26));
+      border: 1px solid rgba(216, 160, 48, 0.38);
+      color: #8a6010;
+      font-size: 0.85rem;
+      white-space: nowrap;
     }
 
-    .section-title {
-      margin: 0;
-      font-size: 0.82rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      padding: 9px 11px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 0.9rem;
       color: var(--muted);
+      transition: all 0.18s ease;
     }
 
-    .gauge-track {
-      width: 100%;
-      height: 30px;
+    .tab-btn.active {
+      background: var(--honey);
+      color: #fff;
+      border-color: var(--honey);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(216, 160, 48, 0.12);
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+
+    /* ── Market Grid ── */
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 11px;
+    }
+
+    .market-card {
+      padding: 17px 17px 15px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* RTL accent stripe on right edge */
+    .market-card::after {
+      content: '';
+      position: absolute;
+      inset-inline-end: 0;
+      top: 18px;
+      bottom: 18px;
+      width: 3px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--honey-light), var(--sage-light));
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .market-card:hover::after { opacity: 1; }
+
+    .market-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .market-card-title {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .market-card-badges {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-revealed {
+      background: rgba(128, 185, 140, 0.2);
+      color: #3a7850;
+      border: 1px solid rgba(128, 185, 140, 0.38);
+    }
+
+    .badge-predicted {
+      background: rgba(216, 160, 48, 0.18);
+      color: #8a6010;
+      border: 1px solid rgba(216, 160, 48, 0.32);
+    }
+
+    .badge-winner {
+      background: rgba(128, 185, 140, 0.28);
+      color: #2a6840;
+      border: 1px solid rgba(128, 185, 140, 0.45);
+    }
+
+    /* ── Mini probability bars ── */
+    .mini-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mini-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+    }
+
+    .mini-bar-label {
+      flex: 0 0 auto;
+      min-width: 38px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 66px;
+    }
+
+    .mini-bar-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(170, 148, 100, 0.15);
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid var(--border);
-      background: rgba(235, 231, 197, 0.88);
-      display: flex;
     }
 
-    .gauge-fill {
+    .mini-bar-fill {
       height: 100%;
-      transition: width 0.4s ease;
+      background: linear-gradient(90deg, var(--honey-light), var(--sage-light));
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .gauge-fill.girl {
-      background: linear-gradient(90deg, #d4b830, #f0d975);
+    .mini-bar-pct {
+      flex: 0 0 auto;
+      min-width: 30px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 0.71rem;
+      font-variant-numeric: tabular-nums;
     }
 
-    .gauge-fill.boy {
-      background: linear-gradient(90deg, #78b038, #aad870);
-    }
+    /* ── Market Detail View ── */
+    .view-container { display: none; }
+    .view-container.active { display: block; }
 
-    .gauge-legend {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .legend-pill {
+    .back-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(240, 234, 202, 0.78);
-      border: 1px solid var(--border);
-      font-size: 0.95rem;
-    }
-
-    .legend-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-
-    .legend-dot.girl { background: var(--pink); }
-    .legend-dot.boy { background: var(--blue); }
-
-    /* Vote card */
-    .trade-card { padding: 28px 22px; }
-
-    .trade-controls { display: grid; gap: 20px; }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .action-btn {
-      min-height: 150px;
-      border: 2px solid var(--border);
-      color: var(--text);
-      border-radius: 24px;
+      border: 1.5px solid var(--border);
+      background: rgba(236, 220, 176, 0.5);
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease, filter 0.16s ease;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 11px;
+      transition: all 0.15s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 252, 244, 0.95);
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+
+    .detail-card { padding: 22px 20px; }
+
+    .detail-title {
+      margin: 0 0 18px 0;
+      font-size: 1.35rem;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .detail-revealed-banner {
+      padding: 13px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(128, 185, 140, 0.14);
+      border: 1px solid rgba(128, 185, 140, 0.32);
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: #3a7850;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .options-grid.single-col { grid-template-columns: 1fr; }
+
+    .option-btn {
+      padding: 15px 13px;
+      border: 1.5px solid var(--border);
+      background: rgba(238, 220, 172, 0.32);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 20px 16px;
-      -webkit-tap-highlight-color: transparent;
+      gap: 4px;
+      text-align: center;
+      font-family: var(--font);
     }
 
-    .btn-emoji {
-      font-size: 3rem;
-      line-height: 1;
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(80, 55, 20, 0.1);
+      border-color: var(--border-strong);
+      background: rgba(255, 252, 244, 0.9);
     }
 
-    .btn-label {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+    .option-btn.selected {
+      border-color: var(--honey);
+      border-width: 2px;
+      background: rgba(216, 160, 48, 0.1);
     }
 
-    .action-btn.pink {
-      border-color: rgba(226, 200, 77, 0.52);
-      background: linear-gradient(160deg, rgba(243, 231, 154, 0.96), rgba(252, 246, 210, 0.99));
-      box-shadow: 0 8px 24px rgba(226, 200, 77, 0.22);
+    .option-btn.selected:not(:disabled):hover {
+      border-color: #c05040;
+      background: rgba(200, 70, 50, 0.1);
     }
 
-    .action-btn.blue {
-      border-color: rgba(143, 195, 74, 0.52);
-      background: linear-gradient(160deg, rgba(190, 232, 140, 0.96), rgba(220, 244, 192, 0.99));
-      box-shadow: 0 8px 24px rgba(143, 195, 74, 0.22);
+    .option-btn.winner {
+      border-color: var(--sage);
+      border-width: 2px;
+      background: rgba(128, 185, 140, 0.14);
     }
 
-    .action-btn:hover:not(:disabled) {
-      transform: translateY(-4px) scale(1.02);
-    }
+    .option-btn:disabled { cursor: not-allowed; opacity: 0.6; }
 
-    .action-btn:active:not(:disabled) {
-      transform: translateY(1px) scale(0.98);
-    }
-
-    .action-btn.choice-highlight {
-      border-width: 3px;
-      transform: translateY(-4px) scale(1.03) !important;
-    }
-
-    .action-btn.pink.choice-highlight {
-      border-color: #c8a820;
-      box-shadow: 0 0 0 6px rgba(226, 200, 77, 0.26), 0 14px 36px rgba(226, 200, 77, 0.32);
-    }
-
-    .action-btn.blue.choice-highlight {
-      border-color: #5a9c18;
-      box-shadow: 0 0 0 6px rgba(143, 195, 74, 0.3), 0 14px 36px rgba(143, 195, 74, 0.32);
-    }
-
-    .choice-dim {
-      opacity: 0.38 !important;
-      transform: scale(0.96) !important;
-      filter: saturate(0.5);
-    }
-
-    .action-btn:disabled {
-      cursor: not-allowed;
-    }
-
-    .simple-note {
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-sm);
-      background: rgba(236, 231, 196, 0.8);
-      padding: 14px 18px;
-      color: var(--muted);
+    .option-label {
       font-size: 1rem;
-      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .option-pct {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .option-mult { color: var(--peach); }
+
+    /* ── Bet Stepper ── */
+    .bet-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 13px;
+      padding: 9px 15px;
+      background: rgba(216, 160, 48, 0.08);
+      border: 1px solid rgba(216, 160, 48, 0.22);
+      border-radius: var(--radius-sm);
+    }
+
+    .stepper-btn {
+      width: 33px;
+      height: 33px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      background: rgba(238, 220, 172, 0.7);
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.13s ease;
+    }
+
+    .stepper-btn:hover:not(:disabled) {
+      background: rgba(255, 252, 244, 0.95);
+      border-color: var(--honey);
+    }
+
+    .stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .stepper-label { font-size: 0.93rem; color: var(--text); }
+
+    /* ── Hints & Prediction ── */
+    .detail-hint {
+      margin-top: 13px;
+      padding: 10px 14px;
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: rgba(225, 206, 155, 0.3);
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-align: center;
+      line-height: 1.55;
+    }
+
+    .your-prediction {
+      margin-top: 13px;
+      padding: 12px 15px;
+      border-radius: var(--radius-sm);
+      background: rgba(216, 160, 48, 0.08);
+      border: 1px solid rgba(216, 160, 48, 0.22);
       text-align: center;
     }
 
-    /* Admin */
-    .admin-panel {
-      padding: 18px 22px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .terminal-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+    .your-prediction-label {
+      font-size: 0.72rem;
       color: var(--muted);
-      font-size: 0.88rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
     }
 
-    .admin-gate, .admin-actions {
+    .your-prediction-value {
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    /* ── Leaderboard ── */
+    .leaderboard-card { padding: 20px 18px; }
+
+    .leaderboard-title {
+      margin: 0 0 15px 0;
+      font-size: 1.25rem;
+      text-align: center;
+      color: var(--text);
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .leaderboard-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px 13px;
+      border-radius: var(--radius-sm);
+      background: rgba(238, 220, 172, 0.3);
+      border: 1px solid var(--border);
+    }
+
+    .leaderboard-row.current-user {
+      background: rgba(216, 160, 48, 0.1);
+      border-color: rgba(216, 160, 48, 0.3);
+    }
+
+    .leaderboard-rank {
+      font-size: 1.2rem;
+      min-width: 32px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .leaderboard-list > .leaderboard-row:nth-child(1) .leaderboard-rank { color: #c49010; }
+    .leaderboard-list > .leaderboard-row:nth-child(2) .leaderboard-rank { color: #9898a0; }
+    .leaderboard-list > .leaderboard-row:nth-child(3) .leaderboard-rank { color: #b07840; }
+
+    .leaderboard-name {
+      flex: 1;
+      font-size: 0.93rem;
+      color: var(--text);
+    }
+
+    .leaderboard-stats {
+      display: flex;
+      gap: 13px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .leaderboard-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    .leaderboard-stat-value {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .leaderboard-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── Admin panel ── */
+    .admin-panel {
+      padding: 15px 19px;
       display: grid;
       gap: 10px;
     }
 
-    .admin-actions {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted-light);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
     }
+
+    .admin-gate, .admin-controls { display: grid; gap: 9px; }
 
     .admin-btn {
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       color: var(--text);
-      background: rgba(240, 234, 201, 0.84);
-      border-radius: 14px;
+      background: rgba(236, 216, 160, 0.5);
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      padding: 13px 16px;
-      font-weight: 700;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      padding: 11px 15px;
+      font-family: var(--font);
+      transition: all 0.13s ease;
     }
 
-    .admin-btn:hover:not(:disabled) { transform: translateY(-1px); }
-
-    .admin-btn:disabled {
-      opacity: 0.42;
-      cursor: not-allowed;
-      transform: none;
+    .admin-btn:hover:not(:disabled) {
+      background: rgba(244, 228, 180, 0.8);
+      transform: translateY(-1px);
     }
 
+    .admin-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+    .admin-market-item {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(236, 216, 160, 0.22);
+      display: grid;
+      gap: 8px;
+    }
+
+    .admin-market-title {
+      font-size: 0.93rem;
+      color: var(--text);
+    }
+
+    .admin-market-controls {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .admin-select {
+      flex: 1;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 252, 244, 0.9);
+      color: var(--text);
+      min-width: 120px;
+    }
+
+    .admin-reveal-btn {
+      padding: 8px 13px;
+      border: 1px solid rgba(128, 185, 140, 0.45);
+      background: rgba(128, 185, 140, 0.12);
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font);
+      color: #3a7850;
+      transition: all 0.13s ease;
+    }
+
+    .admin-reveal-btn:hover { background: rgba(128, 185, 140, 0.22); }
+
+    /* ── Utils ── */
     .hidden { display: none !important; }
 
     .footer-note {
-      color: var(--muted);
-      font-size: 0.85rem;
+      color: var(--muted-light);
+      font-size: 0.78rem;
       text-align: center;
-      padding-bottom: 8px;
+      padding-bottom: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Nickname Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 8000;
+      background: rgba(42, 30, 12, 0.62);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.visible { display: flex; }
+
+    .modal-box {
+      padding: 30px 26px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .modal-title {
+      margin: 0 0 22px 0;
+      font-size: 1.6rem;
+      color: var(--text);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 13px 18px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 252, 244, 0.96);
+      font-size: 1.05rem;
+      font-family: var(--font);
+      text-align: center;
+      color: var(--text);
+      margin-bottom: 13px;
+      transition: border-color 0.15s;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--honey);
+    }
+
+    .modal-submit {
+      width: 100%;
+      padding: 13px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--honey);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 1.1rem;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: all 0.15s ease;
+    }
+
+    .modal-submit:hover { background: #c09020; transform: translateY(-1px); }
+
+    .modal-submit:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      transform: none;
     }
 
     /* ── Full-screen reveal ── */
@@ -307,19 +718,45 @@
 
     .result-banner.visible {
       display: flex;
-      animation: reveal-in 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: reveal-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .result-banner.winner-pink {
-      background: radial-gradient(circle at 40% 40%, #f8e060 0%, #e8a820 45%, #c07800 100%);
+    /* Golden hour blaze */
+    .result-banner.winner-gold {
+      background: radial-gradient(ellipse at 40% 38%, #fffae0 0%, #ffd840 18%, #f09020 42%, #c84808 68%, #601800 100%);
     }
 
-    .result-banner.winner-blue {
-      background: radial-gradient(circle at 40% 40%, #9ae050 0%, #58b020 45%, #2a7800 100%);
+    .result-banner.winner-green {
+      background: radial-gradient(ellipse at 40% 38%, #f4fff0 0%, #b0f0b0 20%, #28c870 48%, #0a7840 76%, #043820 100%);
     }
+
+    /* Rotating warm light rays */
+    .result-banner::before {
+      content: '';
+      position: absolute;
+      inset: -60%;
+      background: conic-gradient(
+        from 0deg at 40% 38%,
+        transparent 0deg,   rgba(255,240,120,0.12) 4deg,   transparent 8deg,
+        transparent 36deg,  rgba(255,240,120,0.12) 40deg,  transparent 44deg,
+        transparent 72deg,  rgba(255,240,120,0.12) 76deg,  transparent 80deg,
+        transparent 108deg, rgba(255,240,120,0.12) 112deg, transparent 116deg,
+        transparent 144deg, rgba(255,240,120,0.12) 148deg, transparent 152deg,
+        transparent 180deg, rgba(255,240,120,0.12) 184deg, transparent 188deg,
+        transparent 216deg, rgba(255,240,120,0.12) 220deg, transparent 224deg,
+        transparent 252deg, rgba(255,240,120,0.12) 256deg, transparent 260deg,
+        transparent 288deg, rgba(255,240,120,0.12) 292deg, transparent 296deg,
+        transparent 324deg, rgba(255,240,120,0.12) 328deg, transparent 332deg,
+        transparent 360deg
+      );
+      animation: spin-rays 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes spin-rays { to { transform: rotate(360deg); } }
 
     @keyframes reveal-in {
-      0%  { opacity: 0; transform: scale(1.1); }
+      0%  { opacity: 0; transform: scale(1.09); }
       100%{ opacity: 1; transform: scale(1); }
     }
 
@@ -328,501 +765,1126 @@
       z-index: 9100;
       text-align: center;
       display: grid;
-      gap: 14px;
+      gap: 10px;
       justify-items: center;
-      animation: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+      animation: pop-in 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
       padding: 24px;
     }
 
     @keyframes pop-in {
-      0%  { opacity: 0; transform: scale(0.5) translateY(30px); }
+      0%  { opacity: 0; transform: scale(0.4) translateY(40px); }
       100%{ opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .result-emoji-big {
-      font-size: clamp(5rem, 20vw, 10rem);
+      font-size: clamp(5rem, 22vw, 11rem);
       line-height: 1;
-      animation: float 2.4s ease-in-out infinite;
+      animation: float 2.6s ease-in-out infinite;
+      filter: drop-shadow(0 8px 28px rgba(0,0,0,0.28));
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(-3deg); }
-      50%       { transform: translateY(-18px) rotate(3deg); }
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50%       { transform: translateY(-20px) rotate(4deg); }
     }
 
     .result-banner h2 {
       margin: 0;
-      font-size: clamp(3.8rem, 14vw, 9rem);
-      font-weight: 900;
-      letter-spacing: -0.04em;
+      font-family: var(--font);
+      font-size: clamp(2.8rem, 14vw, 7rem);
+      letter-spacing: -0.01em;
       color: #fff;
-      text-shadow: 0 4px 24px rgba(0,0,0,0.28), 0 0 80px rgba(255,255,255,0.5);
+      text-shadow:
+        0 0 70px rgba(255, 220, 80, 0.75),
+        0 4px 32px rgba(0, 0, 0, 0.38),
+        0 1px 0 rgba(0, 0, 0, 0.18);
       line-height: 1;
-      animation: pulse-text 1.8s ease-in-out infinite;
+      animation: pulse-text 2s ease-in-out infinite;
     }
 
     @keyframes pulse-text {
       0%, 100% { transform: scale(1); }
-      50%       { transform: scale(1.05); }
+      50%       { transform: scale(1.04); }
     }
 
     .result-sub {
       margin: 0;
       font-size: clamp(1.2rem, 4vw, 2rem);
-      color: rgba(255,255,255,0.9);
-      font-weight: 700;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
     }
 
     .result-tap-hint {
       margin: 0;
-      font-size: 0.95rem;
-      color: rgba(255,255,255,0.55);
-      margin-top: 8px;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.42);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
     }
 
-    /* Confetti particles (created via JS) */
+    /* ── Confetti ── */
     @keyframes confetti-fall {
-      0%   { transform: translateY(-10px) rotate(0deg);   opacity: 1; }
-      100% { transform: translateY(110vh) rotate(600deg); opacity: 0; }
+      0%   { transform: translateY(-10px) rotate(0deg);    opacity: 1; }
+      100% { transform: translateY(110vh) rotate(600deg);  opacity: 0; }
     }
 
     @keyframes confetti-sway {
-      0%   { transform: translateY(-10px) translateX(0)    rotate(0deg);   opacity: 1; }
-      40%  { transform: translateY(44vh)  translateX(28px) rotate(280deg); opacity: 1; }
-      100% { transform: translateY(110vh) translateX(-18px)rotate(600deg); opacity: 0; }
+      0%   { transform: translateY(-10px) translateX(0)     rotate(0deg);   opacity: 1; }
+      40%  { transform: translateY(44vh)  translateX(28px)  rotate(280deg); opacity: 1; }
+      100% { transform: translateY(110vh) translateX(-18px) rotate(600deg); opacity: 0; }
     }
 
-    /* Responsive */
-    @media (max-width: 760px) {
-      body { padding: 12px; }
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      body { padding: 10px; }
 
       .topbar {
         position: static;
-        padding: 16px 18px;
+        padding: 15px 17px 13px;
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 10px;
       }
 
-      .action-btn   { min-height: 160px; }
-      .btn-emoji    { font-size: 3.4rem; }
-      .btn-label    { font-size: 2.4rem; }
+      .topbar-right { justify-content: flex-start; }
+      .market-grid { grid-template-columns: 1fr; }
+      .options-grid { grid-template-columns: 1fr; }
 
-      .admin-actions { grid-template-columns: 1fr; }
+      .leaderboard-stats {
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .admin-market-controls { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="shell">
 
-    <section class="topbar">
-      <h1>מה ניץ מבשלת?</h1>
-      <div class="status-pill" id="connectionStatus">מתחבר...</div>
-    </section>
+    <!-- Nickname Modal -->
+    <div class="modal-overlay" id="nicknameModal">
+      <div class="modal-box glass-panel">
+        <h2 class="modal-title">מה השם שלך?</h2>
+        <input type="text" class="modal-input" id="nicknameInput" placeholder="הכניסו שם..." maxlength="30">
+        <button class="modal-submit" id="nicknameSubmit">יאללה!</button>
+      </div>
+    </div>
 
     <!-- Full-screen reveal overlay -->
     <section class="result-banner" id="resultBanner">
       <div class="result-content">
-        <div class="result-emoji-big" id="resultEmoji">🎀</div>
-        <h2 id="resultTitle">זו בת!</h2>
+        <div class="result-emoji-big" id="resultEmoji"></div>
+        <h2 id="resultTitle"></h2>
         <p class="result-sub" id="resultSub"></p>
         <p class="result-tap-hint">לחצו להסרת המסך</p>
       </div>
     </section>
 
-    <!-- Live gauge -->
-    <section class="card gauge-card">
-      <div class="section-title">ניחושים בזמן אמת</div>
-      <div class="gauge-track" aria-label="Live odds gauge">
-        <div class="gauge-fill girl" id="girlGauge" style="width: 50%;"></div>
-        <div class="gauge-fill boy"  id="boyGauge"  style="width: 50%;"></div>
+    <!-- Topbar -->
+    <header class="topbar glass-panel">
+      <div class="topbar-left">
+        <h1>בורסת תינוקות</h1>
+        <p class="topbar-tagline">ניחושים בשידור חי</p>
       </div>
-      <div class="gauge-legend">
-        <div class="legend-pill"><span class="legend-dot girl"></span>בת&nbsp;<strong id="girlGaugeLabel">50%</strong></div>
-        <div class="legend-pill"><span class="legend-dot boy"></span>בן&nbsp;<strong id="boyGaugeLabel">50%</strong></div>
+      <div class="topbar-right">
+        <div class="coin-pill" id="coinBalance">🪙 1000</div>
+        <div class="status-pill" id="connectionStatus">מתחבר...</div>
+      </div>
+    </header>
+
+    <!-- Tab bar -->
+    <nav class="tab-bar glass-panel">
+      <button class="tab-btn active" id="tabGrid">שאלות</button>
+      <button class="tab-btn" id="tabLeaderboard">דירוג</button>
+    </nav>
+
+    <!-- Grid View -->
+    <section class="view-container active" id="viewGrid">
+      <div class="market-grid" id="marketGrid">
+        <!-- Market cards rendered by JS -->
       </div>
     </section>
 
-    <!-- Vote card -->
-    <section class="card trade-card">
-      <div class="trade-controls">
-        <div class="section-title" style="text-align:center;">מה הניחוש שלכם?</div>
-        <div class="action-grid">
-          <button class="action-btn pink" id="betPinkBtn">
-            <div class="btn-emoji">👧</div>
-            <div class="btn-label">בת</div>
-          </button>
-          <button class="action-btn blue" id="betBlueBtn">
-            <div class="btn-emoji">👦</div>
-            <div class="btn-label">בן</div>
-          </button>
+    <!-- Market Detail View -->
+    <section class="view-container" id="viewDetail">
+      <button class="back-btn" id="backBtn">← חזרה</button>
+      <div class="detail-card glass-panel" id="detailCard">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Leaderboard View -->
+    <section class="view-container" id="viewLeaderboard">
+      <div class="leaderboard-card glass-panel">
+        <h2 class="leaderboard-title">טבלת דירוג</h2>
+        <div class="leaderboard-list" id="leaderboardList">
+          <!-- Rendered by JS -->
         </div>
-        <div class="simple-note" id="tradeHint">לחצו פעם אחת כדי לנעול את הבחירה.</div>
       </div>
     </section>
 
-    <!-- Admin panel -->
-    <section class="admin-panel">
-      <div class="terminal-line">
+    <!-- Admin Panel -->
+    <section class="admin-panel glass-panel">
+      <div class="admin-header">
         <strong>פאנל ניהול</strong>
         <span>למנהל בלבד</span>
       </div>
       <div class="admin-gate" id="adminGate">
         <button class="admin-btn" id="adminUnlockBtn">פתח ניהול</button>
       </div>
-      <div id="adminControls" class="hidden">
-        <div class="admin-actions">
-          <button class="admin-btn" id="revealPinkBtn">חשוף בת 👧</button>
-          <button class="admin-btn" id="revealBlueBtn">חשוף בן 👦</button>
-          <button class="admin-btn" id="resetMarketBtn">אפס</button>
-          <button class="admin-btn" id="resetWalletBtn">אפס את הבחירה שלי</button>
+      <div class="admin-controls hidden" id="adminControls">
+        <button class="admin-btn" id="resetAllBtn" style="background:rgba(220,80,60,0.12);border-color:rgba(220,80,60,0.32);color:#a03020;">↺ אפס הכל</button>
+        <div id="adminMarketsList">
+          <!-- Rendered by JS -->
         </div>
       </div>
     </section>
 
-    <div class="footer-note">גילוי מין 2026 ✨</div>
+    <div class="footer-note">בורסת תינוקות 2026</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL    = "https://pyaqlhumyhvsutamhwmb.supabase.co";
+    // ══════════════════════════════════════════════════════════════════════
+    // Configuration
+    // ══════════════════════════════════════════════════════════════════════
+    const SUPABASE_URL = "https://pyaqlhumyhvsutamhwmb.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_DIejNqBd3o6wIjuxDGWp2A_an9icl7t";
-    const ADMIN_PASSCODE  = "babylove2026";
-    const MARKET_ID       = 1;
-    const STORAGE_KEY     = "gender-reveal-market-vote-v3";
-    const DEFAULT_WALLET  = { vote: null, locked: false, history: [] };
-    const SIDE_LABELS     = { pink: "בת", blue: "בן" };
+    const ADMIN_PASSCODE = "babylove2026";
+    const STARTING_COINS = 1000;
+    const BET_AMOUNT = 100;
 
+    const STORAGE_KEYS = {
+      userId: 'baby-market-user-id',
+      nickname: 'baby-market-nickname',
+      predictions: 'baby-market-predictions'
+    };
+
+    // ══════════════════════════════════════════════════════════════════════
+    // State
+    // ══════════════════════════════════════════════════════════════════════
+    const APP = {
+      supabase: null,
+      userId: null,
+      nickname: null,
+      markets: [],
+      predictions: {},
+      leaderboard: [],
+      currentView: 'grid',
+      currentMarket: null,
+      isAdmin: false,
+      channels: [],
+      confettiNode: null,
+      revealTimer: null,
+      betAmount: BET_AMOUNT
+    };
+
+    // ══════════════════════════════════════════════════════════════════════
+    // DOM Elements
+    // ══════════════════════════════════════════════════════════════════════
     const els = {
-      connectionStatus: document.getElementById("connectionStatus"),
-      girlGauge:        document.getElementById("girlGauge"),
-      boyGauge:         document.getElementById("boyGauge"),
-      girlGaugeLabel:   document.getElementById("girlGaugeLabel"),
-      boyGaugeLabel:    document.getElementById("boyGaugeLabel"),
-      tradeHint:        document.getElementById("tradeHint"),
-      betPinkBtn:       document.getElementById("betPinkBtn"),
-      betBlueBtn:       document.getElementById("betBlueBtn"),
-      adminGate:        document.getElementById("adminGate"),
-      adminControls:    document.getElementById("adminControls"),
-      adminUnlockBtn:   document.getElementById("adminUnlockBtn"),
-      revealPinkBtn:    document.getElementById("revealPinkBtn"),
-      revealBlueBtn:    document.getElementById("revealBlueBtn"),
-      resetMarketBtn:   document.getElementById("resetMarketBtn"),
-      resetWalletBtn:   document.getElementById("resetWalletBtn"),
-      resultBanner:     document.getElementById("resultBanner"),
-      resultTitle:      document.getElementById("resultTitle"),
-      resultEmoji:      document.getElementById("resultEmoji"),
-      resultSub:        document.getElementById("resultSub"),
+      connectionStatus: document.getElementById('connectionStatus'),
+      nicknameModal: document.getElementById('nicknameModal'),
+      nicknameInput: document.getElementById('nicknameInput'),
+      nicknameSubmit: document.getElementById('nicknameSubmit'),
+      tabGrid: document.getElementById('tabGrid'),
+      tabLeaderboard: document.getElementById('tabLeaderboard'),
+      viewGrid: document.getElementById('viewGrid'),
+      viewDetail: document.getElementById('viewDetail'),
+      viewLeaderboard: document.getElementById('viewLeaderboard'),
+      marketGrid: document.getElementById('marketGrid'),
+      detailCard: document.getElementById('detailCard'),
+      backBtn: document.getElementById('backBtn'),
+      leaderboardList: document.getElementById('leaderboardList'),
+      adminGate: document.getElementById('adminGate'),
+      adminControls: document.getElementById('adminControls'),
+      adminUnlockBtn: document.getElementById('adminUnlockBtn'),
+      resetAllBtn: document.getElementById('resetAllBtn'),
+      adminMarketsList: document.getElementById('adminMarketsList'),
+      resultBanner: document.getElementById('resultBanner'),
+      resultTitle: document.getElementById('resultTitle'),
+      resultEmoji: document.getElementById('resultEmoji'),
+      resultSub: document.getElementById('resultSub'),
+      coinBalance: document.getElementById('coinBalance')
     };
 
-    const state = {
-      wallet:           loadWallet(),
-      market:           null,
-      channel:          null,
-      supabase:         null,
-      isBusy:           false,
-      isAdmin:          false,
-      revealTimer:      null,
-      confettiNode:     null,
-    };
+    // ══════════════════════════════════════════════════════════════════════
+    // LocalStorage Helpers
+    // ══════════════════════════════════════════════════════════════════════
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
 
-    /* ── Wallet helpers ── */
+    function loadUserId() {
+      let id = localStorage.getItem(STORAGE_KEYS.userId);
+      if (!id) {
+        id = generateUUID();
+        localStorage.setItem(STORAGE_KEYS.userId, id);
+      }
+      return id;
+    }
 
-    function loadWallet() {
+    function loadNickname() {
+      return localStorage.getItem(STORAGE_KEYS.nickname) || null;
+    }
+
+    function saveNickname(name) {
+      localStorage.setItem(STORAGE_KEYS.nickname, name);
+      APP.nickname = name;
+    }
+
+    function loadPredictions() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? { ...DEFAULT_WALLET, ...JSON.parse(raw) } : { ...DEFAULT_WALLET };
-      } catch { return { ...DEFAULT_WALLET }; }
+        const raw = localStorage.getItem(STORAGE_KEYS.predictions);
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
     }
 
-    function saveWallet() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.wallet));
+    function savePredictions() {
+      localStorage.setItem(STORAGE_KEYS.predictions, JSON.stringify(APP.predictions));
     }
 
-    function resetLocalWallet() {
-      state.wallet = { ...DEFAULT_WALLET, history: [] };
-      saveWallet();
-      renderWallet();
-      renderReveal();
+    // Keyed as "slug:optionId" → {market_slug, option_id, shares, amount}
+    function predKey(slug, optionId) { return `${slug}:${optionId}`; }
+    function hasUserBet(slug, optionId) { return !!APP.predictions[predKey(slug, optionId)]; }
+    function getUserBetsForMarket(slug) {
+      return Object.values(APP.predictions).filter(p => p.market_slug === slug);
     }
 
-    function sideLabel(side) { return SIDE_LABELS[side] || side; }
-
-    function getPrices(market) {
-      const p = Number(market.pink_pool), b = Number(market.blue_pool), t = p + b;
-      return { pink: t ? b / t : 0.5, blue: t ? p / t : 0.5 };
+    // ══════════════════════════════════════════════════════════════════════
+    // AMM Calculations
+    // ══════════════════════════════════════════════════════════════════════
+    function calculateProbabilities(options) {
+      if (!options || !Array.isArray(options)) return [];
+      // prob_i = (1/pool_i) / sum(1/pool_j)
+      // Lower pool = more bets = higher probability (correct CPMM semantics)
+      const weights = options.map(opt => {
+        const pool = Number(opt.pool) || 0;
+        return pool > 0 ? 1 / pool : 0;
+      });
+      const totalWeight = weights.reduce((s, w) => s + w, 0);
+      if (totalWeight === 0) return options.map(() => Math.round(100 / options.length));
+      return weights.map(w => Math.round(w / totalWeight * 100));
     }
 
-    /* ── Confetti ── */
+    function calculateMultipliers(options) {
+      if (!options || !Array.isArray(options)) return [];
+      const probs = calculateProbabilities(options);
+      return probs.map(p => p > 0 ? 100 / p : 0);
+    }
 
-    function launchConfetti(isGirl) {
-      if (state.confettiNode) { state.confettiNode.remove(); state.confettiNode = null; }
+    function currentUserBalance() {
+      const spent = Object.values(APP.predictions).reduce((s, p) => s + (Number(p.amount) || BET_AMOUNT), 0);
+      return STARTING_COINS - spent;
+    }
 
-      const wrap = document.createElement("div");
-      wrap.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:9300;overflow:hidden;";
+    function updateCoinDisplay() {
+      const balance = currentUserBalance();
+      els.coinBalance.textContent = `🪙 ${balance.toLocaleString()}`;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Confetti
+    // ══════════════════════════════════════════════════════════════════════
+    function launchConfetti(colors) {
+      if (APP.confettiNode) {
+        APP.confettiNode.remove();
+        APP.confettiNode = null;
+      }
+
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9300;overflow:hidden;';
       document.body.appendChild(wrap);
-      state.confettiNode = wrap;
+      APP.confettiNode = wrap;
 
-      const palette = isGirl
-        ? ["#e2c84d","#f5d742","#fff","#ffeeaa","#ffd700","#fff5cc","#f0c030"]
-        : ["#8fc34a","#b0d970","#fff","#d4f0a0","#5daa20","#efffcc","#78b838"];
+      const palette = colors || ['#e2c84d', '#f5d742', '#fff', '#ffeeaa', '#ffd700', '#fff5cc', '#f0c030'];
 
       for (let i = 0; i < 110; i++) {
-        const el    = document.createElement("div");
-        const size  = Math.random() * 13 + 6;
-        const x     = Math.random() * 100;
+        const el = document.createElement('div');
+        const size = Math.random() * 13 + 6;
+        const x = Math.random() * 100;
         const delay = Math.random() * 1.4;
-        const dur   = Math.random() * 2.8 + 2;
+        const dur = Math.random() * 2.8 + 2;
         const color = palette[Math.floor(Math.random() * palette.length)];
         const round = Math.random() > 0.45;
-        const anim  = Math.random() > 0.5 ? "confetti-fall" : "confetti-sway";
+        const anim = Math.random() > 0.5 ? 'confetti-fall' : 'confetti-sway';
 
         el.style.cssText = [
-          "position:absolute",
+          'position:absolute',
           `width:${size}px`,
           `height:${round ? size : size * 0.45}px`,
           `background:${color}`,
-          `border-radius:${round ? "50%" : "3px"}`,
+          `border-radius:${round ? '50%' : '3px'}`,
           `left:${x}%`,
-          "top:-20px",
-          `animation:${anim} ${dur}s ease-in ${delay}s forwards`,
-        ].join(";");
+          'top:-20px',
+          `animation:${anim} ${dur}s ease-in ${delay}s forwards`
+        ].join(';');
         wrap.appendChild(el);
       }
 
       setTimeout(() => {
-        if (state.confettiNode === wrap) { wrap.remove(); state.confettiNode = null; }
+        if (APP.confettiNode === wrap) {
+          wrap.remove();
+          APP.confettiNode = null;
+        }
       }, 5500);
     }
 
-    /* ── Render functions ── */
+    // ══════════════════════════════════════════════════════════════════════
+    // Reveal Banner
+    // ══════════════════════════════════════════════════════════════════════
+    function showRevealBanner(market, winnerOption) {
+      if (APP.revealTimer) {
+        clearTimeout(APP.revealTimer);
+        APP.revealTimer = null;
+      }
 
-    function updateTradeHint() {
-      if (state.wallet.locked) {
-        els.tradeHint.textContent = "בחרת ב" + sideLabel(state.wallet.vote) + " — הבחירה נעולה ✓";
+      const emoji = getOptionEmoji(market.slug, winnerOption.id);
+      els.resultEmoji.textContent = emoji;
+      els.resultTitle.textContent = winnerOption.label_he;
+
+      // Check if user predicted correctly
+      const userPrediction = APP.predictions[market.slug];
+      if (userPrediction) {
+        if (userPrediction.option_id === winnerOption.id) {
+          els.resultSub.textContent = 'ניחשת נכון!';
+        } else {
+          els.resultSub.textContent = 'ניחוש שגוי';
+        }
       } else {
-        els.tradeHint.textContent = "לחצו פעם אחת כדי לנעול את הבחירה.";
-      }
-    }
-
-    function renderWallet() {
-      const { vote } = state.wallet;
-      els.betPinkBtn.classList.toggle("choice-highlight", vote === "pink");
-      els.betBlueBtn.classList.toggle("choice-highlight", vote === "blue");
-      els.betPinkBtn.classList.toggle("choice-dim", !!vote && vote !== "pink");
-      els.betBlueBtn.classList.toggle("choice-dim", !!vote && vote !== "blue");
-      updateTradeHint();
-    }
-
-    function renderMarket() {
-      if (!state.market) return;
-      const prices = getPrices(state.market);
-      els.girlGauge.style.width  = (prices.pink * 100).toFixed(1) + "%";
-      els.boyGauge.style.width   = (prices.blue * 100).toFixed(1) + "%";
-      els.girlGaugeLabel.textContent = Math.round(prices.pink * 100) + "%";
-      els.boyGaugeLabel.textContent  = Math.round(prices.blue * 100) + "%";
-      updateTradeHint();
-      renderReveal();
-    }
-
-    function renderAdmin() {
-      els.adminGate.classList.toggle("hidden", state.isAdmin);
-      els.adminControls.classList.toggle("hidden", !state.isAdmin);
-    }
-
-    function renderReveal() {
-      if (state.revealTimer) { clearTimeout(state.revealTimer); state.revealTimer = null; }
-
-      if (!state.market?.revealed || !state.market?.winner) {
-        els.resultBanner.classList.remove("visible", "winner-pink", "winner-blue");
-        if (state.confettiNode) { state.confettiNode.remove(); state.confettiNode = null; }
-        return;
+        els.resultSub.textContent = '';
       }
 
-      const winner = state.market.winner;
-      const isGirl = winner === "pink";
+      els.resultBanner.classList.remove('winner-gold', 'winner-green');
+      els.resultBanner.classList.add('visible', 'winner-gold');
 
-      els.resultTitle.textContent = isGirl ? "זו בת!" : "זה בן!";
-      els.resultEmoji.textContent = isGirl ? "👧" : "👦";
+      launchConfetti();
 
-      if (state.wallet.vote) {
-        els.resultSub.textContent = state.wallet.vote === winner ? "ניחשת נכון! 🎉" : "ניחוש שגוי 😅";
-      } else {
-        els.resultSub.textContent = "";
-      }
-
-      els.resultBanner.classList.remove("winner-pink", "winner-blue");
-      els.resultBanner.classList.add("visible", isGirl ? "winner-pink" : "winner-blue");
-
-      launchConfetti(isGirl);
-
-      state.revealTimer = setTimeout(() => {
-        els.resultBanner.classList.remove("visible", "winner-pink", "winner-blue");
-        state.revealTimer = null;
+      APP.revealTimer = setTimeout(() => {
+        dismissRevealBanner();
       }, 9000);
     }
 
-    function setBusy(nextBusy) {
-      state.isBusy = nextBusy;
-      const disabled = nextBusy || !state.market || state.market.revealed || state.wallet.locked;
-      els.betPinkBtn.disabled   = disabled;
-      els.betBlueBtn.disabled   = disabled;
-      els.adminUnlockBtn.disabled = nextBusy;
-      els.revealPinkBtn.disabled  = disabled || !state.isAdmin;
-      els.revealBlueBtn.disabled  = disabled || !state.isAdmin;
-      els.resetMarketBtn.disabled = nextBusy || !state.market || !state.isAdmin;
-      els.resetWalletBtn.disabled = nextBusy || !state.isAdmin;
+    function dismissRevealBanner() {
+      if (APP.revealTimer) {
+        clearTimeout(APP.revealTimer);
+        APP.revealTimer = null;
+      }
+      els.resultBanner.classList.remove('visible', 'winner-gold', 'winner-green');
     }
 
-    /* ── Supabase actions ── */
-
-    async function fetchMarket() {
-      const { data, error } = await state.supabase
-        .from("market").select("*").eq("id", MARKET_ID).single();
-      if (error) throw error;
-      state.market = data;
-      renderMarket();
+    function getOptionEmoji(marketSlug, optionId) {
+      // Special emojis for known markets
+      const emojiMap = {
+        'gender': { 'boy': '👦', 'girl': '👧' },
+        'hair': { 'bald': '👶', 'light': '👱', 'dark': '🧒' },
+        'eyes': { 'blue': '🔵', 'brown': '🟤', 'green': '🟢', 'other': '👁️' },
+        'birth_month': { 'aug': '☀️', 'sep': '🍂', 'oct': '🎃' },
+        'weight': { 'under3': '🪶', '3to33': '⚖️', '33to36': '⚖️', 'over36': '🏋️' },
+        'time_of_day': { 'morning': '🌅', 'afternoon': '☀️', 'evening': '🌆', 'night': '🌙' },
+        'day_of_week': { 'weekday': '📅', 'weekend': '🎉' },
+        'first_word': { 'ima': '👩', 'aba': '👨', 'other': '💬' }
+      };
+      return emojiMap[marketSlug]?.[optionId] || '🎉';
     }
 
-    async function placeBet(side) {
-      if (!state.market || state.market.revealed || state.wallet.locked) return;
-      setBusy(true);
-      try {
-        const { data, error } = await state.supabase.rpc("place_market_bet", {
-          p_market_id: MARKET_ID, p_side: side, p_amount: 25
+    // ══════════════════════════════════════════════════════════════════════
+    // View Management
+    // ══════════════════════════════════════════════════════════════════════
+    function switchView(view) {
+      APP.currentView = view;
+
+      els.viewGrid.classList.toggle('active', view === 'grid');
+      els.viewDetail.classList.toggle('active', view === 'market');
+      els.viewLeaderboard.classList.toggle('active', view === 'leaderboard');
+
+      els.tabGrid.classList.toggle('active', view === 'grid' || view === 'market');
+      els.tabLeaderboard.classList.toggle('active', view === 'leaderboard');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Render Functions
+    // ══════════════════════════════════════════════════════════════════════
+    function renderMarketGrid() {
+      if (!APP.markets.length) {
+        els.marketGrid.innerHTML = '<p style="text-align:center;color:var(--muted);padding:24px;">טוען שאלות...</p>';
+        return;
+      }
+
+      els.marketGrid.innerHTML = APP.markets.map(market => {
+        const probs = calculateProbabilities(market.options);
+        const userBets = getUserBetsForMarket(market.slug);
+        const isRevealed = market.revealed;
+        const winnerOption = isRevealed && market.winner
+          ? market.options.find(o => o.id === market.winner)
+          : null;
+
+        let badges = '';
+        if (isRevealed) {
+          badges += `<span class="badge badge-revealed">נחשף</span>`;
+        }
+        userBets.forEach(bet => {
+          const predOpt = market.options.find(o => o.id === bet.option_id);
+          if (predOpt) badges += `<span class="badge badge-predicted">✓ ${predOpt.label_he}</span>`;
         });
-        if (error) throw error;
-        state.wallet.vote   = side;
-        state.wallet.locked = true;
-        state.wallet.history.unshift({ side, at: new Date().toISOString() });
-        saveWallet();
-        renderWallet();
-        state.market = Array.isArray(data) ? data[0] : data;
-        renderMarket();
-      } catch (err) {
-        console.error(err);
-        const msg = err?.message || "אירעה שגיאה. בדקו חיבור.";
-        els.tradeHint.textContent = msg;
-        alert(msg);
-      } finally { setBusy(false); }
-    }
+        if (winnerOption) {
+          badges += `<span class="badge badge-winner">${winnerOption.label_he}</span>`;
+        }
 
-    async function revealWinner(winner) {
-      if (!state.market) return;
-      setBusy(true);
-      try {
-        const { data, error } = await state.supabase
-          .from("market")
-          .update({ revealed: true, winner, announcement: null, updated_at: new Date().toISOString() })
-          .eq("id", MARKET_ID).select().single();
-        if (error) throw error;
-        state.market = data;
-        renderMarket();
-      } catch (err) {
-        console.error(err);
-        const msg = err?.message || "החשיפה נכשלה.";
-        els.tradeHint.textContent = msg;
-        alert(msg);
-      } finally { setBusy(false); }
-    }
+        // Gender market special banner
+        let specialBanner = '';
+        if (market.slug === 'gender' && isRevealed && market.winner === 'boy') {
+          specialBanner = '<div style="background:rgba(143,195,74,0.3);padding:8px;border-radius:8px;text-align:center;font-weight:700;color:#3a6a10;">בן זכה! 👦</div>';
+        }
 
-    async function resetMarket() {
-      if (!state.market) return;
-      setBusy(true);
-      try {
-        const { data, error } = await state.supabase
-          .from("market")
-          .update({ pink_pool: 500, blue_pool: 500, revealed: false, winner: null, announcement: null, updated_at: new Date().toISOString() })
-          .eq("id", MARKET_ID).select().single();
-        if (error) throw error;
-        state.market = data;
-        els.tradeHint.textContent = "השוק אופס.";
-        renderMarket();
-      } catch (err) {
-        console.error(err);
-        const msg = err?.message || "האיפוס נכשל.";
-        els.tradeHint.textContent = msg;
-        alert(msg);
-      } finally { setBusy(false); }
-    }
+        // Mini probability bars: sort by popularity desc, show top 3
+        const sortedGridIndices = probs.map((p, i) => i).sort((a, b) => probs[b] - probs[a]);
+        const miniBars = sortedGridIndices.slice(0, 3).map(i => {
+          const opt = market.options[i];
+          const pct = probs[i] || 0;
+          return `
+            <div class="mini-bar-row">
+              <span class="mini-bar-label">${opt.label_he}</span>
+              <div class="mini-bar-track">
+                <div class="mini-bar-fill" style="width:${pct}%"></div>
+              </div>
+              <span class="mini-bar-pct">${pct}%</span>
+            </div>
+          `;
+        }).join('');
 
-    function unlockAdmin() {
-      const input = window.prompt("הכניסו קוד מנהל");
-      if (input === null) return;
-      if (input !== ADMIN_PASSCODE) { alert("קוד שגוי."); return; }
-      state.isAdmin = true;
-      renderAdmin();
-      setBusy(state.isBusy);
-    }
+        return `
+          <div class="market-card glass-panel" data-slug="${market.slug}">
+            <h3 class="market-card-title">${market.title_he}</h3>
+            ${specialBanner}
+            <div class="mini-bars">${miniBars}</div>
+            <div class="market-card-badges">${badges}</div>
+          </div>
+        `;
+      }).join('');
 
-    /* ── Event bindings ── */
-
-    function bindUI() {
-      els.betPinkBtn.addEventListener("click",  () => placeBet("pink"));
-      els.betBlueBtn.addEventListener("click",  () => placeBet("blue"));
-      els.adminUnlockBtn.addEventListener("click", unlockAdmin);
-      els.revealPinkBtn.addEventListener("click",  () => revealWinner("pink"));
-      els.revealBlueBtn.addEventListener("click",  () => revealWinner("blue"));
-      els.resetMarketBtn.addEventListener("click", resetMarket);
-      els.resetWalletBtn.addEventListener("click", () => {
-        resetLocalWallet();
-        els.tradeHint.textContent = "הבחירה במכשיר הזה אופסה.";
-      });
-      // Tap to dismiss reveal early
-      els.resultBanner.addEventListener("click", () => {
-        if (state.revealTimer) { clearTimeout(state.revealTimer); state.revealTimer = null; }
-        els.resultBanner.classList.remove("visible", "winner-pink", "winner-blue");
+      // Add click listeners
+      els.marketGrid.querySelectorAll('.market-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const slug = card.dataset.slug;
+          openMarketDetail(slug);
+        });
       });
     }
 
-    /* ── Realtime subscription ── */
-
-    async function setupRealtime() {
-      state.channel = state.supabase
-        .channel("market-live")
-        .on("postgres_changes",
-          { event: "UPDATE", schema: "public", table: "market", filter: "id=eq." + MARKET_ID },
-          (payload) => { state.market = payload.new; renderMarket(); }
-        )
-        .subscribe((status) => {
-          if (status === "SUBSCRIBED") {
-            els.connectionStatus.textContent = "חיבור חי ✓";
-          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            els.connectionStatus.textContent = "החיבור נחלש";
-          }
-        });
+    function openMarketDetail(slug) {
+      APP.currentMarket = slug;
+      switchView('market');
+      renderMarketDetail();
     }
 
-    /* ── Boot ── */
+    function renderMarketDetail() {
+      const market = APP.markets.find(m => m.slug === APP.currentMarket);
+      if (!market) {
+        els.detailCard.innerHTML = '<p>שוק לא נמצא</p>';
+        return;
+      }
 
-    async function init() {
-      setBusy(true);
-      renderWallet();
-      renderAdmin();
-      bindUI();
+      const probs = calculateProbabilities(market.options);
+      const multipliers = calculateMultipliers(market.options);
+      const userBets = getUserBetsForMarket(market.slug);
+      const isRevealed = market.revealed;
+      const winnerOption = isRevealed && market.winner
+        ? market.options.find(o => o.id === market.winner)
+        : null;
 
-      if (!SUPABASE_URL || SUPABASE_URL === "YOUR_SUPABASE_URL" ||
-          !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
-        els.connectionStatus.textContent = "יש להגדיר מפתחות Supabase";
-        els.tradeHint.textContent = "הוסיפו את כתובת Supabase ואת המפתח הציבורי.";
+      // Determine grid layout
+      const isBinary = market.market_type === 'binary' || market.options.length === 2;
+      const gridClass = isBinary ? '' : 'single-col';
+
+      // Revealed banner
+      let revealedBanner = '';
+      if (isRevealed && winnerOption) {
+        revealedBanner = `
+          <div class="detail-revealed-banner">
+            ${winnerOption.label_he} ${getOptionEmoji(market.slug, winnerOption.id)}
+          </div>
+        `;
+      }
+
+      // Options sorted by popularity desc
+      const sortedOptIndices = probs.map((p, i) => i).sort((a, b) => probs[b] - probs[a]);
+      const optionsHtml = sortedOptIndices.map(idx => {
+        const opt = market.options[idx];
+        const pct = probs[idx] || 0;
+        const mult = multipliers[idx] || 0;
+        const isSelected = hasUserBet(market.slug, opt.id);
+        const isWinner = isRevealed && market.winner === opt.id;
+        let classes = 'option-btn';
+        if (isSelected) classes += ' selected';
+        if (isWinner) classes += ' winner';
+        const disabled = isRevealed ? 'disabled' : '';
+        const multDisplay = mult >= 2 ? `<span class="option-mult">×${mult.toFixed(1)}</span>` : '';
+
+        return `
+          <button class="${classes}" data-option-id="${opt.id}" ${disabled}>
+            <span class="option-label">${isSelected ? '✓ ' : ''}${opt.label_he}</span>
+            <span class="option-pct">${pct}%${multDisplay ? ' · ' : ''}${multDisplay}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Bet amount stepper (only when market is open)
+      const balance = currentUserBalance();
+      const stepperHtml = isRevealed ? '' : `
+        <div class="bet-stepper">
+          <button class="stepper-btn" id="betDecrease" ${APP.betAmount <= BET_AMOUNT ? 'disabled' : ''}>−</button>
+          <span class="stepper-label">הימור: 🪙 <strong id="betAmountDisplay">${APP.betAmount}</strong></span>
+          <button class="stepper-btn" id="betIncrease" ${APP.betAmount + BET_AMOUNT > balance ? 'disabled' : ''}>+</button>
+        </div>
+      `;
+
+      // Hint
+      let hint = '';
+      if (isRevealed) {
+        hint = '<div class="detail-hint">השאלה נחשפה</div>';
+      } else if (userBets.length > 0) {
+        hint = `<div class="detail-hint">ניחשת ${userBets.length} ניחוש${userBets.length > 1 ? 'ים' : ''} · לחצו על ניחוש נוסף להוספה</div>`;
+      } else {
+        hint = `<div class="detail-hint">לחצו על ניחוש אחד או יותר (כל אחד עולה 🪙 ${APP.betAmount})</div>`;
+      }
+
+      // Your prediction section
+      let yourPrediction = '';
+      if (userBets.length > 0) {
+        const betItems = userBets.map(bet => {
+          const predOpt = market.options.find(o => o.id === bet.option_id);
+          const isCorrect = isRevealed && market.winner === bet.option_id;
+          return `<span>${predOpt?.label_he || ''}${isRevealed ? (isCorrect ? ' ✓' : ' ✗') : ''}</span>`;
+        }).join(' · ');
+        yourPrediction = `
+          <div class="your-prediction">
+            <div class="your-prediction-label">הניחושים שלך</div>
+            <div class="your-prediction-value">${betItems}</div>
+          </div>
+        `;
+      }
+
+      els.detailCard.innerHTML = `
+        <h2 class="detail-title">${market.title_he}</h2>
+        ${revealedBanner}
+        ${stepperHtml}
+        <div class="options-grid ${gridClass}">${optionsHtml}</div>
+        ${hint}
+        ${yourPrediction}
+      `;
+
+      // Wire up stepper buttons
+      if (!isRevealed) {
+        const decreaseBtn = document.getElementById('betDecrease');
+        const increaseBtn = document.getElementById('betIncrease');
+        if (decreaseBtn) {
+          decreaseBtn.addEventListener('click', () => {
+            if (APP.betAmount > BET_AMOUNT) {
+              APP.betAmount -= BET_AMOUNT;
+              renderMarketDetail();
+            }
+          });
+        }
+        if (increaseBtn) {
+          increaseBtn.addEventListener('click', () => {
+            const bal = currentUserBalance();
+            if (APP.betAmount + BET_AMOUNT <= bal) {
+              APP.betAmount += BET_AMOUNT;
+              renderMarketDetail();
+            }
+          });
+        }
+      }
+
+      // Add click listeners to option buttons
+      if (!isRevealed) {
+        els.detailCard.querySelectorAll('.option-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const optionId = btn.dataset.optionId;
+            if (btn.classList.contains('selected')) {
+              await unplaceBet(market.slug, optionId);
+            } else {
+              await placeBet(market.slug, optionId, APP.betAmount);
+            }
+          });
+        });
+      }
+    }
+
+    function renderLeaderboard() {
+      if (!APP.leaderboard.length) {
+        els.leaderboardList.innerHTML = '<div class="leaderboard-empty">אין עדיין ניחושים</div>';
+        return;
+      }
+
+      els.leaderboardList.innerHTML = APP.leaderboard.map((entry, idx) => {
+        const isCurrentUser = entry.user_id === APP.userId;
+        const rank = idx + 1;
+        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+
+        return `
+          <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
+            <span class="leaderboard-rank">${rankEmoji}</span>
+            <span class="leaderboard-name">${entry.nickname}${isCurrentUser ? ' (אתה)' : ''}</span>
+            <div class="leaderboard-stats">
+              <div class="leaderboard-stat">
+                <span class="leaderboard-stat-value">${Math.round(entry.balance ?? STARTING_COINS)} 🪙</span>
+                <span>יתרה</span>
+              </div>
+              <div class="leaderboard-stat">
+                <span class="leaderboard-stat-value">${entry.correct || 0}/${entry.total_revealed || 0}</span>
+                <span>נכונים</span>
+              </div>
+              <div class="leaderboard-stat">
+                <span class="leaderboard-stat-value">${entry.total_predictions || 0}</span>
+                <span>ניחושים</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminPanel() {
+      els.adminGate.classList.toggle('hidden', APP.isAdmin);
+      els.adminControls.classList.toggle('hidden', !APP.isAdmin);
+
+      if (!APP.isAdmin) return;
+
+      els.adminMarketsList.innerHTML = APP.markets.map(market => {
+        const optionsHtml = market.options.map(opt =>
+          `<option value="${opt.id}">${opt.label_he}</option>`
+        ).join('');
+
+        const revealControls = market.revealed
+          ? `<span style="color:#3a7850;">✓ נחשף: ${market.actual_value || market.winner}</span>`
+          : `<select class="admin-select" id="admin-select-${market.slug}">
+               <option value="">בחר תשובה...</option>
+               ${optionsHtml}
+             </select>
+             <button class="admin-reveal-btn" data-slug="${market.slug}">חשוף</button>`;
+
+        return `
+          <div class="admin-market-item">
+            <div class="admin-market-title">${market.title_he}</div>
+            <div class="admin-market-controls">
+              ${revealControls}
+              <button class="admin-reset-btn" data-slug="${market.slug}" style="padding:8px 11px;border:1px solid rgba(216,160,48,0.38);background:rgba(216,160,48,0.12);border-radius:12px;cursor:pointer;color:#8a6010;font-family:var(--font);">↺ אפס</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Reveal button listeners
+      els.adminMarketsList.querySelectorAll('.admin-reveal-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const slug = btn.dataset.slug;
+          const select = document.getElementById(`admin-select-${slug}`);
+          const winnerId = select?.value;
+          if (!winnerId) { alert('יש לבחור תשובה'); return; }
+          await revealMarket(slug, winnerId);
+        });
+      });
+
+      // Reset button listeners
+      els.adminMarketsList.querySelectorAll('.admin-reset-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const slug = btn.dataset.slug;
+          const market = APP.markets.find(m => m.slug === slug);
+          if (!confirm(`לאפס את "${market?.title_he}"? כל הניחושים ימחקו.`)) return;
+          await resetMarket(slug);
+        });
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Data Fetching
+    // ══════════════════════════════════════════════════════════════════════
+    async function fetchMarkets() {
+      try {
+        const { data, error } = await APP.supabase
+          .from('markets')
+          .select('*')
+          .order('reveal_order', { ascending: true, nullsFirst: false });
+
+        if (error) throw error;
+        APP.markets = data || [];
+        renderMarketGrid();
+        renderAdminPanel();
+
+        // If we're on market detail view, re-render it
+        if (APP.currentView === 'market' && APP.currentMarket) {
+          renderMarketDetail();
+        }
+      } catch (err) {
+        console.error('Error fetching markets:', err);
+      }
+    }
+
+    async function fetchLeaderboard() {
+      try {
+        const { data, error } = await APP.supabase
+          .from('leaderboard')
+          .select('*')
+          .order('winnings', { ascending: false });
+
+        if (error) throw error;
+        APP.leaderboard = data || [];
+        renderLeaderboard();
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+      }
+    }
+
+    async function fetchUserPredictions() {
+      if (!APP.userId) return;
+
+      try {
+        const { data, error } = await APP.supabase
+          .from('predictions')
+          .select('market_slug, option_id, shares, amount')
+          .eq('user_id', APP.userId);
+
+        if (error) throw error;
+
+        // DB is authoritative — rebuild from scratch
+        const dbPredictions = {};
+        (data || []).forEach(p => {
+          dbPredictions[predKey(p.market_slug, p.option_id)] = {
+            market_slug: p.market_slug,
+            option_id: p.option_id,
+            shares: p.shares,
+            amount: p.amount
+          };
+        });
+        APP.predictions = dbPredictions;
+        savePredictions();
+        updateCoinDisplay();
+
+        renderMarketGrid();
+        if (APP.currentView === 'market') {
+          renderMarketDetail();
+        }
+      } catch (err) {
+        console.error('Error fetching user predictions:', err);
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Actions
+    // ══════════════════════════════════════════════════════════════════════
+    async function unplaceBet(marketSlug, optionId) {
+      try {
+        const { error } = await APP.supabase
+          .from('predictions')
+          .delete()
+          .eq('user_id', APP.userId)
+          .eq('market_slug', marketSlug)
+          .eq('option_id', optionId);
+
+        if (error) throw error;
+
+        delete APP.predictions[predKey(marketSlug, optionId)];
+        savePredictions();
+        updateCoinDisplay();
+        renderMarketGrid();
+        renderMarketDetail();
+        fetchLeaderboard();
+      } catch (err) {
+        console.error('Error removing bet:', err);
+        alert(err.message || 'שגיאה בביטול הניחוש');
+      }
+    }
+
+    async function placeBet(marketSlug, optionId, amount = BET_AMOUNT) {
+      if (!APP.nickname) {
+        showNicknameModal();
         return;
       }
 
       try {
-        state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        await fetchMarket();
-        await setupRealtime();
-        els.connectionStatus.textContent = "מחובר ✓";
+        const { data, error } = await APP.supabase.rpc('place_market_bet', {
+          p_market_slug: marketSlug,
+          p_user_id: APP.userId,
+          p_nickname: APP.nickname,
+          p_option_id: optionId,
+          p_amount: amount
+        });
+
+        if (error) throw error;
+
+        // Update market with new odds from RPC response
+        const marketData = Array.isArray(data) ? data[0] : data;
+        if (marketData) {
+          const idx = APP.markets.findIndex(m => m.slug === marketSlug);
+          if (idx !== -1) {
+            APP.markets[idx] = { ...APP.markets[idx], ...marketData };
+          }
+        }
+
+        // Optimistic local update; fetchUserPredictions syncs exact shares
+        APP.predictions[predKey(marketSlug, optionId)] = {
+          market_slug: marketSlug, option_id: optionId, shares: 0, amount
+        };
+        savePredictions();
+        updateCoinDisplay();
+        fetchUserPredictions();
+
+        renderMarketGrid();
+        renderMarketDetail();
+        fetchLeaderboard();
+
       } catch (err) {
-        console.error(err);
-        els.connectionStatus.textContent = "החיבור נכשל";
-        els.tradeHint.textContent = err.message || "לא ניתן להתחבר.";
-      } finally {
-        setBusy(false);
+        console.error('Error placing bet:', err);
+        alert(err.message || 'אירעה שגיאה בביצוע הניחוש');
       }
     }
 
+    async function resetMarket(marketSlug) {
+      try {
+        const { data, error } = await APP.supabase.rpc('reset_market', { p_market_slug: marketSlug });
+        if (error) throw error;
+        const idx = APP.markets.findIndex(m => m.slug === marketSlug);
+        if (idx !== -1 && data) APP.markets[idx] = { ...APP.markets[idx], ...data };
+        // Clear local predictions for this market
+        Object.keys(APP.predictions).forEach(k => {
+          if (APP.predictions[k].market_slug === marketSlug) delete APP.predictions[k];
+        });
+        savePredictions();
+        updateCoinDisplay();
+        renderMarketGrid();
+        renderAdminPanel();
+        if (APP.currentView === 'market' && APP.currentMarket === marketSlug) renderMarketDetail();
+        await fetchLeaderboard();
+      } catch (err) {
+        console.error('Error resetting market:', err);
+        alert(err.message || 'שגיאה באיפוס');
+      }
+    }
+
+    async function revealMarket(marketSlug, winnerId) {
+      const market = APP.markets.find(m => m.slug === marketSlug);
+      if (!market) return;
+
+      const winnerOption = market.options.find(o => o.id === winnerId);
+      if (!winnerOption) return;
+
+      try {
+        const { error } = await APP.supabase
+          .from('markets')
+          .update({
+            revealed: true,
+            winner: winnerId,
+            actual_value: winnerOption.label_he,
+            updated_at: new Date().toISOString()
+          })
+          .eq('slug', marketSlug);
+
+        if (error) throw error;
+
+        // Show reveal banner
+        showRevealBanner(market, winnerOption);
+
+        // Refresh data
+        await fetchMarkets();
+        await fetchLeaderboard();
+
+      } catch (err) {
+        console.error('Error revealing market:', err);
+        alert(err.message || 'שגיאה בחשיפה');
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Nickname Modal
+    // ══════════════════════════════════════════════════════════════════════
+    function showNicknameModal() {
+      els.nicknameModal.classList.add('visible');
+      els.nicknameInput.focus();
+    }
+
+    function hideNicknameModal() {
+      els.nicknameModal.classList.remove('visible');
+    }
+
+    function handleNicknameSubmit() {
+      const name = els.nicknameInput.value.trim();
+      if (!name) {
+        els.nicknameInput.focus();
+        return;
+      }
+      saveNickname(name);
+      hideNicknameModal();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Admin
+    // ══════════════════════════════════════════════════════════════════════
+    function unlockAdmin() {
+      const input = window.prompt('הכניסו קוד מנהל');
+      if (input === null) return;
+      if (input !== ADMIN_PASSCODE) {
+        alert('קוד שגוי');
+        return;
+      }
+      APP.isAdmin = true;
+      renderAdminPanel();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Realtime Subscriptions
+    // ══════════════════════════════════════════════════════════════════════
+    function setupRealtime() {
+      // Markets subscription
+      const marketsChannel = APP.supabase
+        .channel('markets-live')
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'markets' },
+          (payload) => {
+            if (payload.eventType === 'UPDATE') {
+              const updated = payload.new;
+              const idx = APP.markets.findIndex(m => m.slug === updated.slug);
+              const wasRevealed = idx !== -1 ? APP.markets[idx].revealed : false;
+
+              if (idx !== -1) {
+                APP.markets[idx] = updated;
+              } else {
+                APP.markets.push(updated);
+              }
+
+              // If just revealed and we're viewing this market, show banner
+              if (!wasRevealed && updated.revealed && updated.winner) {
+                const winnerOption = updated.options?.find(o => o.id === updated.winner);
+                if (winnerOption) {
+                  // Only show banner if we're on this market OR it's the first reveal
+                  if (APP.currentMarket === updated.slug || APP.currentView === 'grid') {
+                    showRevealBanner(updated, winnerOption);
+                  }
+                }
+              }
+            } else if (payload.eventType === 'INSERT') {
+              APP.markets.push(payload.new);
+            }
+
+            renderMarketGrid();
+            renderAdminPanel();
+            if (APP.currentView === 'market') {
+              renderMarketDetail();
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            els.connectionStatus.textContent = 'חיבור חי';
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            els.connectionStatus.textContent = 'החיבור נותק';
+          }
+        });
+
+      APP.channels.push(marketsChannel);
+
+      // Predictions subscription (for leaderboard updates)
+      const predictionsChannel = APP.supabase
+        .channel('predictions-live')
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'predictions' },
+          () => {
+            fetchLeaderboard();
+          }
+        )
+        .subscribe();
+
+      APP.channels.push(predictionsChannel);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Event Bindings
+    // ══════════════════════════════════════════════════════════════════════
+    function bindEvents() {
+      // Tab navigation
+      els.tabGrid.addEventListener('click', () => {
+        APP.currentMarket = null;
+        switchView('grid');
+      });
+
+      els.tabLeaderboard.addEventListener('click', () => {
+        switchView('leaderboard');
+        fetchLeaderboard();
+      });
+
+      // Back button
+      els.backBtn.addEventListener('click', () => {
+        APP.currentMarket = null;
+        switchView('grid');
+      });
+
+      // Admin
+      els.adminUnlockBtn.addEventListener('click', unlockAdmin);
+      els.resetAllBtn.addEventListener('click', async () => {
+        if (!confirm('לאפס את כל השאלות? כל הניחושים ימחקו לגמרי.')) return;
+        const slugs = APP.markets.map(m => m.slug);
+        for (const slug of slugs) await resetMarket(slug);
+      });
+
+      // Nickname modal
+      els.nicknameSubmit.addEventListener('click', handleNicknameSubmit);
+      els.nicknameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleNicknameSubmit();
+      });
+
+      // Reveal banner dismiss
+      els.resultBanner.addEventListener('click', dismissRevealBanner);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Initialization
+    // ══════════════════════════════════════════════════════════════════════
+    async function init() {
+      // Load user data from localStorage
+      APP.userId = loadUserId();
+      APP.nickname = loadNickname();
+      APP.predictions = loadPredictions();
+      updateCoinDisplay();
+
+      // Check if we need nickname
+      if (!APP.nickname) {
+        showNicknameModal();
+      }
+
+      // Bind UI events
+      bindEvents();
+
+      // Initialize Supabase
+      try {
+        APP.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Fetch initial data
+        await Promise.all([
+          fetchMarkets(),
+          fetchLeaderboard(),
+          fetchUserPredictions()
+        ]);
+
+        // Setup realtime
+        setupRealtime();
+
+        els.connectionStatus.textContent = 'מחובר';
+
+      } catch (err) {
+        console.error('Initialization error:', err);
+        els.connectionStatus.textContent = 'שגיאת חיבור';
+      }
+    }
+
+    // Start the app
     init();
   </script>
 </body>
