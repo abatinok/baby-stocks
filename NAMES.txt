@@ -1,0 +1,15 @@
+VALUES (
+  'name',
+  'שם',
+  'multiple',
+  '[{"id":"name1","label_he":"נבו","pool":500}
+  ,{"id":"name2","label_he":"מיכאל","pool":500}
+  ,{"id":"name3","label_he":"כרמי","pool":500}
+  ,{"id":"name4","label_he":"רום","pool":500}
+  ,{"id":"name5","label_he":"סיני","pool":500}
+  ,{"id":"name6","label_he":"רפאל","pool":500}
+  ,{"id":"name7","label_he":"עידו","pool":500}
+  ,{"id":"name8","label_he":"ארבל","pool":500}
+  ,{"id":"name9","label_he":"לני","pool":500}]'::JSONB,
+  4
+)

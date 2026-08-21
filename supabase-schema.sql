@@ -437,8 +437,24 @@ VALUES (
   'name',
   'שם',
   'multiple',
-  '[{"id":"name1","label_he":"שם א׳","pool":500},{"id":"name2","label_he":"שם ב׳","pool":500},{"id":"name3","label_he":"שם ג׳","pool":500}]'::JSONB,
+  '[{"id":"name1","label_he":"נבו","pool":500},{"id":"name2","label_he":"מיכאל","pool":500},{"id":"name3","label_he":"כרמי","pool":500},{"id":"name4","label_he":"רום","pool":500},{"id":"name5","label_he":"סיני","pool":500},{"id":"name6","label_he":"רפאל","pool":500},{"id":"name7","label_he":"עידו","pool":500},{"id":"name8","label_he":"ארבל","pool":500},{"id":"name9","label_he":"לני","pool":500}]'::JSONB,
   4
+)
+ON CONFLICT (slug) DO UPDATE SET
+  title_he     = EXCLUDED.title_he,
+  market_type  = EXCLUDED.market_type,
+  options      = EXCLUDED.options,
+  reveal_order = EXCLUDED.reveal_order,
+  updated_at   = NOW();
+
+-- 1. gender (flagship market)
+INSERT INTO public.markets (slug, title_he, market_type, options, reveal_order)
+VALUES (
+  'gender',
+  'בן או בת?',
+  'binary',
+  '[{"id":"boy","label_he":"בן","pool":500},{"id":"girl","label_he":"בת","pool":500}]'::JSONB,
+  1
 )
 ON CONFLICT (slug) DO UPDATE SET
   title_he     = EXCLUDED.title_he,
@@ -534,7 +550,7 @@ VALUES (
   'דומה יותר ל...',
   'multiple',
   '[{"id":"mom","label_he":"ניץ","pool":500},{"id":"dad","label_he":"עומר","pool":500}]'::JSONB,
-  13
+  10
 )
 ON CONFLICT (slug) DO UPDATE SET
   title_he     = EXCLUDED.title_he,
@@ -543,14 +559,14 @@ ON CONFLICT (slug) DO UPDATE SET
   reveal_order = EXCLUDED.reveal_order,
   updated_at   = NOW();
 
--- 14. first-cry
+-- 11. first-cry
 INSERT INTO public.markets (slug, title_he, market_type, options, reveal_order)
 VALUES (
   'first-cry',
   'מי יבכה ראשון?',
   'multiple',
   '[{"id":"baby","label_he":"התינוק","pool":500},{"id":"mom","label_he":"ניץ","pool":500},{"id":"dad","label_he":"עומר","pool":500},{"id":"grandparents","label_he":"סבא/סבתא","pool":500}]'::JSONB,
-  14
+  11
 )
 ON CONFLICT (slug) DO UPDATE SET
   title_he     = EXCLUDED.title_he,

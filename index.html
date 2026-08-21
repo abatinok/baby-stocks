@@ -724,8 +724,12 @@
       background: radial-gradient(ellipse at 40% 38%, #fffae0 0%, #ffd840 18%, #f09020 42%, #c84808 68%, #601800 100%);
     }
 
-    .result-banner.winner-green {
-      background: radial-gradient(ellipse at 40% 38%, #f4fff0 0%, #b0f0b0 20%, #28c870 48%, #0a7840 76%, #043820 100%);
+    .result-banner.winner-blue {
+      background: radial-gradient(ellipse at 40% 38%, #eef7ff 0%, #a8d4ff 20%, #4a90e2 48%, #1f5aad 76%, #0a2a52 100%);
+    }
+
+    .result-banner.winner-pink {
+      background: radial-gradient(ellipse at 40% 38%, #fff0f7 0%, #ffc0e0 20%, #f2508f 48%, #b02066 76%, #4a0830 100%);
     }
 
     /* Rotating warm light rays */
@@ -854,6 +858,9 @@
       }
 
       .admin-market-controls { flex-direction: column; }
+
+      .stepper-btn { width: 44px; height: 44px; }
+      .tab-btn { padding: 13px 16px; }
     }
   </style>
 </head>
@@ -1242,24 +1249,35 @@
 
       const emoji = getOptionEmoji(market.slug, winnerOption.id);
       els.resultEmoji.textContent = emoji;
-      els.resultTitle.textContent = winnerOption.label_he;
+      els.resultTitle.textContent = market.slug === 'gender'
+        ? (winnerOption.id === 'boy' ? 'זה בן! 👦' : 'זו בת! 👧')
+        : winnerOption.label_he;
 
       // Check if user predicted correctly
-      const userPrediction = APP.predictions[market.slug];
-      if (userPrediction) {
-        if (userPrediction.option_id === winnerOption.id) {
-          els.resultSub.textContent = 'ניחשת נכון!';
-        } else {
-          els.resultSub.textContent = 'ניחוש שגוי';
-        }
+      const userBets = getUserBetsForMarket(market.slug);
+      if (userBets.length > 0) {
+        const guessedRight = userBets.some(bet => bet.option_id === winnerOption.id);
+        els.resultSub.textContent = guessedRight ? 'ניחשת נכון!' : 'ניחוש שגוי';
       } else {
         els.resultSub.textContent = '';
       }
 
-      els.resultBanner.classList.remove('winner-gold', 'winner-green');
-      els.resultBanner.classList.add('visible', 'winner-gold');
+      let variant = 'winner-gold';
+      let confettiColors;
+      if (market.slug === 'gender') {
+        if (winnerOption.id === 'boy') {
+          variant = 'winner-blue';
+          confettiColors = ['#4a90e2', '#7fb8f0', '#fff', '#cfe6ff', '#2f6fd1', '#eaf4ff'];
+        } else {
+          variant = 'winner-pink';
+          confettiColors = ['#f28fc0', '#ffb6d9', '#fff', '#ffe0ef', '#e0559b', '#fff0f7'];
+        }
+      }
 
-      launchConfetti();
+      els.resultBanner.classList.remove('winner-gold', 'winner-blue', 'winner-pink');
+      els.resultBanner.classList.add('visible', variant);
+
+      launchConfetti(confettiColors);
 
       APP.revealTimer = setTimeout(() => {
         dismissRevealBanner();
@@ -1271,7 +1289,7 @@
         clearTimeout(APP.revealTimer);
         APP.revealTimer = null;
       }
-      els.resultBanner.classList.remove('visible', 'winner-gold', 'winner-green');
+      els.resultBanner.classList.remove('visible', 'winner-gold', 'winner-blue', 'winner-pink');
       setTimeout(processRevealQueue, 0);
     }
 
@@ -1281,7 +1299,10 @@
         'gender': { 'boy': '👦', 'girl': '👧' },
         'weight': { 'lt3': '🪶', '3to33': '⚖️', '33to36': '⚖️', '36to4': '🏋️', 'gt4': '🏋️' },
         'eye-color': { 'blue': '🔵', 'brown': '🟤', 'green': '🟢', 'gray': '⚪' },
-        'name': { 'name1': '🪪', 'name2': '📛', 'name3': '✨' },
+        'name': {
+          'name1': '🌟', 'name2': '🌟', 'name3': '🌟', 'name4': '🌟', 'name5': '🌟',
+          'name6': '🌟', 'name7': '🌟', 'name8': '🌟', 'name9': '🌟'
+        },
         'birth-date': {
           'oct10-16': '🍁',
           'oct17-23': '🎃',
@@ -1345,7 +1366,9 @@
         // Gender market special banner
         let specialBanner = '';
         if (market.slug === 'gender' && isRevealed && market.winner === 'boy') {
-          specialBanner = '<div style="background:rgba(143,195,74,0.3);padding:8px;border-radius:8px;text-align:center;font-weight:700;color:#3a6a10;">בן זכה! 👦</div>';
+          specialBanner = '<div style="background:rgba(74,144,226,0.22);padding:8px;border-radius:8px;text-align:center;font-weight:700;color:#1f5aad;">זה בן! 👦</div>';
+        } else if (market.slug === 'gender' && isRevealed && market.winner === 'girl') {
+          specialBanner = '<div style="background:rgba(242,143,192,0.25);padding:8px;border-radius:8px;text-align:center;font-weight:700;color:#c23b7c;">זו בת! 👧</div>';
         }
 
         // Mini probability bars: sort by popularity desc, show top 3
@@ -1520,7 +1543,7 @@
               await unplaceBet(market.slug, optionId);
             } else {
               if (!canPlaceBet(APP.betAmount)) {
-                alert('××™×Ÿ ×œ×š ×ž×¡×¤×™×§ ×ž×˜×‘×¢×•×ª ×œ×”×™×ž×•×¨ ×”×–×”');
+                alert('אין לך מספיק מטבעות להימור הזה');
                 renderMarketDetail();
                 return;
               }
@@ -1646,8 +1669,7 @@
       try {
         const { data, error } = await APP.supabase
           .from('leaderboard')
-          .select('*')
-          .order('winnings', { ascending: false });
+          .select('*');
 
         if (error) throw error;
         APP.leaderboard = data || [];
@@ -1732,7 +1754,7 @@
 
       const numericAmount = Number(amount);
       if (!canPlaceBet(numericAmount)) {
-        alert('××™×Ÿ ×œ×š ×ž×¡×¤×™×§ ×ž×˜×‘×¢×•×ª ×œ×”×™×ž×•×¨ ×”×–×”');
+        alert('אין לך מספיק מטבעות להימור הזה');
         renderMarketDetail();
         return;
       }
@@ -1919,7 +1941,7 @@
         )
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') {
-            els.connectionStatus.textContent = 'מחובר לשרת';
+            els.connectionStatus.textContent = 'מחובר';
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
             els.connectionStatus.textContent = 'החיבור נותק';
           }
