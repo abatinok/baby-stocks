@@ -956,9 +956,22 @@
     // ══════════════════════════════════════════════════════════════════════
     const SUPABASE_URL = "https://pyaqlhumyhvsutamhwmb.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_DIejNqBd3o6wIjuxDGWp2A_an9icl7t";
-    const ADMIN_PASSCODE = "babylove2026";
     const STARTING_COINS = 1000;
     const BET_AMOUNT = 100;
+
+    // Admin auth payload — ciphertext only, safe to commit. Generate your own with
+    // `node tools/generate-admin-payload.mjs` (see AdminAuth module below and README
+    // for what this does and does not protect). The plaintext admin password is never
+    // stored here or anywhere else in this repo.
+    // This placeholder payload was generated with a random, unrecorded password —
+    // it will not unlock for anyone. Run the generator and paste in your own before
+    // relying on the admin panel.
+    const ADMIN_AUTH_PAYLOAD = {
+      salt: "6IHt175hLI1c2rGCKoznNQ==",
+      iv: "4JPurhpdXPef041U",
+      ciphertext: "3Hqwzoeqo4n9YGl9VRYLrFyIefGqwX3H6I/2apOR4ZXLOfpy2bUZ6e0=",
+      iterations: 250000
+    };
 
     const STORAGE_KEYS = {
       userId: 'baby-market-user-id',
@@ -966,6 +979,77 @@
       predictions: 'baby-market-predictions',
       seenReveals: 'baby-market-seen-reveals'
     };
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Admin auth
+    //
+    // What this protects: casual inspection of the page/DevTools no longer turns
+    // up a plaintext admin password, and flipping a boolean in the console (e.g.
+    // `APP.isAdmin = true`) can no longer unlock the manager panel, because there
+    // is no such boolean on the globally-reachable APP object anymore — the
+    // unlocked flag lives in this closure and is only set after a real AES-GCM
+    // decrypt succeeds against ADMIN_AUTH_PAYLOAD (i.e. the correct password was
+    // supplied; AES-GCM's authentication tag is what proves that, not a string
+    // comparison). revealMarket/resetMarket also check isUnlocked() before doing
+    // anything, so calling renderAdminPanel() directly no longer helps either.
+    //
+    // What this does NOT protect: this is still a static site with a public
+    // Supabase anon key and RLS policies that already permit that key to write
+    // to `markets`/`predictions` (see README's security note — unchanged, out of
+    // scope here). Anyone technically sophisticated can open DevTools and call
+    // the Supabase client directly (e.g. `APP.supabase.from('markets').update(...)`)
+    // or redefine these functions to skip the isUnlocked() check entirely — no
+    // client-side code can prevent that. This module only stops the *casual*
+    // "read the source / flip a flag" path; it is a UI/source-inspection gate,
+    // not server-side authorization. Real authorization would require a backend
+    // or tighter RLS, which is explicitly out of scope for this change.
+    // ══════════════════════════════════════════════════════════════════════
+    const AdminAuth = (function () {
+      let unlocked = false;
+
+      function b64ToBuf(b64) {
+        return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      }
+
+      async function deriveKey(password, saltB64, iterations) {
+        const baseKey = await crypto.subtle.importKey(
+          'raw',
+          new TextEncoder().encode(password),
+          'PBKDF2',
+          false,
+          ['deriveKey']
+        );
+        return crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: b64ToBuf(saltB64), iterations, hash: 'SHA-256' },
+          baseKey,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['decrypt']
+        );
+      }
+
+      async function tryUnlock(password) {
+        if (!ADMIN_AUTH_PAYLOAD || !ADMIN_AUTH_PAYLOAD.ciphertext) return false;
+        try {
+          const key = await deriveKey(password, ADMIN_AUTH_PAYLOAD.salt, ADMIN_AUTH_PAYLOAD.iterations);
+          const iv = b64ToBuf(ADMIN_AUTH_PAYLOAD.iv);
+          const ciphertext = b64ToBuf(ADMIN_AUTH_PAYLOAD.ciphertext);
+          // Throws (auth tag mismatch) on any wrong password — that failure IS
+          // the password check, there is no separate plaintext comparison.
+          await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+          unlocked = true;
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      function isUnlocked() {
+        return unlocked;
+      }
+
+      return { tryUnlock, isUnlocked };
+    })();
 
     // ══════════════════════════════════════════════════════════════════════
     // State
@@ -979,7 +1063,6 @@
       leaderboard: [],
       currentView: 'grid',
       currentMarket: null,
-      isAdmin: false,
       channels: [],
       confettiNode: null,
       revealTimer: null,
@@ -1589,10 +1672,11 @@
     }
 
     function renderAdminPanel() {
-      els.adminGate.classList.toggle('hidden', APP.isAdmin);
-      els.adminControls.classList.toggle('hidden', !APP.isAdmin);
+      const isAdmin = AdminAuth.isUnlocked();
+      els.adminGate.classList.toggle('hidden', isAdmin);
+      els.adminControls.classList.toggle('hidden', !isAdmin);
 
-      if (!APP.isAdmin) return;
+      if (!isAdmin) return;
 
       els.adminMarketsList.innerHTML = APP.markets.map(market => {
         const optionsHtml = market.options.map(opt =>
@@ -1805,6 +1889,7 @@
     }
 
     async function resetMarket(marketSlug) {
+      if (!AdminAuth.isUnlocked()) return;
       try {
         const { data, error } = await APP.supabase.rpc('reset_market', { p_market_slug: marketSlug });
         if (error) throw error;
@@ -1827,6 +1912,7 @@
     }
 
     async function revealMarket(marketSlug, winnerId) {
+      if (!AdminAuth.isUnlocked()) return;
       const market = APP.markets.find(m => m.slug === marketSlug);
       if (!market) return;
 
@@ -1891,14 +1977,14 @@
     // ══════════════════════════════════════════════════════════════════════
     // Admin
     // ══════════════════════════════════════════════════════════════════════
-    function unlockAdmin() {
+    async function unlockAdmin() {
       const input = window.prompt('הכניסו קוד מנהל');
       if (input === null) return;
-      if (input !== ADMIN_PASSCODE) {
+      const ok = await AdminAuth.tryUnlock(input);
+      if (!ok) {
         alert('קוד שגוי');
         return;
       }
-      APP.isAdmin = true;
       renderAdminPanel();
     }
 
@@ -1987,6 +2073,7 @@
       // Admin
       els.adminUnlockBtn.addEventListener('click', unlockAdmin);
       els.resetAllBtn.addEventListener('click', async () => {
+        if (!AdminAuth.isUnlocked()) return;
         if (!confirm('לאפס את כל השאלות? כל הניחושים ימחקו לגמרי.')) return;
         const slugs = APP.markets.map(m => m.slug);
         for (const slug of slugs) await resetMarket(slug);

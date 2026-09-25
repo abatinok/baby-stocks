@@ -18,21 +18,30 @@ get revealed live during the party with a full-screen animated banner and confet
 1. Create a Supabase project, run `supabase-schema.sql` in the SQL editor.
 2. Drop in `SUPABASE_URL` / `SUPABASE_ANON_KEY` in `index.html` (search for the constants
    near the top of the `<script>` block).
-3. Host `index.html` anywhere static (GitHub Pages, Netlify, Vercel, or just open the file
+3. Set your own admin password: run `node tools/generate-admin-payload.mjs`, follow the
+   prompt, and paste the printed object over the `ADMIN_AUTH_PAYLOAD` placeholder near the
+   top of the `<script>` block. The script never writes the password anywhere — only the
+   encrypted payload is printed, and that's what gets committed.
+4. Host `index.html` anywhere static (GitHub Pages, Netlify, Vercel, or just open the file
    locally on the host's laptop and share a tunnel URL). No server-side code required.
-4. Only share the URL with your actual guests — see the security note below.
+5. Only share the URL with your actual guests — see the security note below.
 
 ## Security note (intentional, party-scale trust model)
 
 This app is built for a one-off party, not a public product, and a few things are
 deliberately **not** locked down:
 
-- `ADMIN_PASSCODE` in `index.html` is a client-visible string — it's a UI gate to keep
-  casual guests out of the admin panel, not real authentication. Anyone who reads the
-  page source can find it.
+- The admin panel is gated by a password you set with `tools/generate-admin-payload.mjs`.
+  The password itself is never stored in the repo; `index.html` only holds an AES-GCM
+  encrypted payload (see the `AdminAuth` module near the top of the `<script>` block) that
+  a correct password can decrypt. This stops casual source/DevTools inspection from
+  handing someone the password or a `APP.isAdmin = true`-style bypass — but it's still a
+  client-side check running in the guest's own browser. It is a UI gate, not real
+  server-side authentication, and can't be made into one without a backend.
 - Row-Level Security on `markets` and `predictions` allows the anon key to update markets
   (reveal/reset) and delete predictions directly. Any client holding the anon key could,
-  in principle, reveal markets early or wipe bets.
+  in principle, reveal markets early or wipe bets — regardless of whether they ever see
+  the admin panel or know the admin password.
 
 This is a conscious trade-off for a same-room, few-hours event, not an oversight. If you
 reuse this for anything beyond a single trusted-audience party:
