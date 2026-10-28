@@ -68,3 +68,32 @@ ON CONFLICT (slug) DO UPDATE SET
   options      = EXCLUDED.options,
   reveal_order = EXCLUDED.reveal_order,
   updated_at   = NOW();
+
+
+-- 12. leaderboard — rank by realized profit on revealed markets
+--     (open bets on unrevealed markets no longer lower a player's rank)
+DROP VIEW IF EXISTS public.leaderboard;
+CREATE VIEW public.leaderboard AS
+SELECT
+  p.user_id,
+  p.nickname,
+  COUNT(*) FILTER (WHERE m.revealed AND p.option_id = m.winner)  AS correct,
+  COUNT(*) FILTER (WHERE m.revealed)                              AS total_revealed,
+  COUNT(*)                                                        AS total_predictions,
+  COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0) AS winnings,
+  1000 - COALESCE(SUM(p.amount), 0)
+    + COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0)
+    AS balance,
+  -- realized profit: revealed winnings minus stakes on revealed markets only,
+  -- so open bets on unrevealed markets don't count against a player's rank
+  COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0)
+    - COALESCE(SUM(p.amount) FILTER (WHERE m.revealed), 0)
+    AS profit
+FROM public.predictions p
+JOIN public.markets m ON p.market_slug = m.slug
+GROUP BY p.user_id, p.nickname
+-- only appear on leaderboard once at least one of your predictions has been revealed
+HAVING COUNT(*) FILTER (WHERE m.revealed) > 0
+ORDER BY profit DESC, correct DESC, total_revealed DESC;
+
+GRANT SELECT ON public.leaderboard TO anon, authenticated;

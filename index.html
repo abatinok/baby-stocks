@@ -1647,6 +1647,8 @@
         const isCurrentUser = entry.user_id === APP.userId;
         const rank = idx + 1;
         const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+        const profit = Math.round(Number(entry.profit) || 0);
+        const profitText = profit > 0 ? `+${profit}` : `${profit}`;
 
         return `
           <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
@@ -1654,8 +1656,8 @@
             <span class="leaderboard-name">${entry.nickname}${isCurrentUser ? ' (אתה)' : ''}</span>
             <div class="leaderboard-stats">
               <div class="leaderboard-stat">
-                <span class="leaderboard-stat-value">${Math.round(entry.balance ?? STARTING_COINS)} 🪙</span>
-                <span>יתרה</span>
+                <span class="leaderboard-stat-value" dir="ltr">${profitText} 🪙</span>
+                <span>רווח</span>
               </div>
               <div class="leaderboard-stat">
                 <span class="leaderboard-stat-value">${entry.correct || 0}/${entry.total_revealed || 0}</span>
@@ -1753,7 +1755,10 @@
       try {
         const { data, error } = await APP.supabase
           .from('leaderboard')
-          .select('*');
+          .select('*')
+          .order('profit', { ascending: false })
+          .order('correct', { ascending: false })
+          .order('total_revealed', { ascending: false });
 
         if (error) throw error;
         APP.leaderboard = data || [];
