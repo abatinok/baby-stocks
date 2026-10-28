@@ -319,13 +319,18 @@ SELECT
   COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0) AS winnings,
   1000 - COALESCE(SUM(p.amount), 0)
     + COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0)
-    AS balance
+    AS balance,
+  -- realized profit: revealed winnings minus stakes on revealed markets only,
+  -- so open bets on unrevealed markets don't count against a player's rank
+  COALESCE(SUM(CASE WHEN m.revealed AND p.option_id = m.winner THEN p.shares ELSE 0 END), 0)
+    - COALESCE(SUM(p.amount) FILTER (WHERE m.revealed), 0)
+    AS profit
 FROM public.predictions p
 JOIN public.markets m ON p.market_slug = m.slug
 GROUP BY p.user_id, p.nickname
 -- only appear on leaderboard once at least one of your predictions has been revealed
 HAVING COUNT(*) FILTER (WHERE m.revealed) > 0
-ORDER BY balance DESC, correct DESC;
+ORDER BY profit DESC, correct DESC, total_revealed DESC;
 
 -- ------------------------------------------------------------
 -- 5. ROW-LEVEL SECURITY
